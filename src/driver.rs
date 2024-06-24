@@ -21,6 +21,7 @@ impl<Spi> Tmc5160<Spi>
 where
     Spi: SpiDevice<u8>,
 {
+    #[inline(always)]
     pub fn write<Reg: Register>(&mut self, data: &Reg) -> Result<SpiStatus, Spi::Error> {
         let address = data.get_address();
         let tx_data = data.get_bytes();
@@ -28,6 +29,7 @@ where
         self.write_impl(address, tx_data)
     }
 
+    #[inline(always)]
     pub fn read<Reg: Register>(&mut self, data: &mut Reg) -> Result<SpiStatus, Spi::Error> {
         let address = data.get_address();
         let data_bytes = self.read_impl(address)?;
@@ -58,6 +60,7 @@ where
     }
 }
 
+#[inline(always)]
 fn parse_packet<Reg: Register>(data_bytes: [u8;5]) -> (SpiStatus, Reg){
 
     let (status, bytes) = parse_miso_packet(data_bytes);
