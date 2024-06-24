@@ -31,8 +31,8 @@ where
     pub fn read<Reg: Register>(&mut self, data: &mut Reg) -> Result<SpiStatus, Spi::Error> {
         let address = data.get_address();
         let data_bytes = self.read_impl(address)?;
-        let (status, reg) = parse_miso_packet::<Reg>(data_bytes);
-        *data = reg;
+        let (status, reg_data) = parse_miso_packet(data_bytes);
+        *data = Register::from_bytes(reg_data);
         Ok(status)
     }
 
@@ -58,13 +58,12 @@ where
     }
 }
 
-fn parse_miso_packet<Reg: Register>(data_bytes: [u8;5]) -> (SpiStatus, Reg){
+fn parse_miso_packet(data_bytes: [u8;5]) -> (SpiStatus, [u8;4]){
     let status = SpiStatus::from(data_bytes[0]);
     let mut data: [u8;4] = [0x00; 4];
     data.clone_from_slice(&data_bytes[1..]);
     data.reverse();
-    let reg: Reg = Register::from_bytes(data);
-    (status, reg)
+    (status, data)
 }
 
 fn create_packet(address: u8, op: Operation, tx_data: [u8; 4]) -> [u8; 5] {
