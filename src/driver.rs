@@ -31,8 +31,8 @@ where
     pub fn read<Reg: Register>(&mut self, data: &mut Reg) -> Result<SpiStatus, Spi::Error> {
         let address = data.get_address();
         let data_bytes = self.read_impl(address)?;
-        let (status, reg_data) = parse_miso_packet(data_bytes);
-        *data = Register::from_bytes(reg_data);
+        let (status, reg_data): (SpiStatus, Reg) = parse_packet(data_bytes);
+        *data = reg_data;
         Ok(status)
     }
 
@@ -56,6 +56,13 @@ where
 
         Ok(miso_packet)
     }
+}
+
+fn parse_packet<Reg: Register>(data_bytes: [u8;5]) -> (SpiStatus, Reg){
+
+    let (status, bytes) = parse_miso_packet(data_bytes);
+
+    (status, Reg::from_bytes(bytes))
 }
 
 fn parse_miso_packet(data_bytes: [u8;5]) -> (SpiStatus, [u8;4]){
@@ -119,7 +126,7 @@ mod tests {
 
         let miso_bytes:[u8; 5] = [0xA5, 0x12, 0x34, 0x56, 0x78];
 
-        let (status, reg): (SpiStatus, XACTUAL) = parse_miso_packet(miso_bytes); 
+        let (status, reg): (SpiStatus, XACTUAL) = parse_packet(miso_bytes); 
         assert_eq!(0x12345678, reg.value());
 
         assert_eq!(1, status.reset_flag());
@@ -131,7 +138,7 @@ mod tests {
         assert_eq!(0, status.status_stop_l());
         assert_eq!(1, status.status_stop_r());
 
-        let (_, reg): (SpiStatus, VMAX) = parse_miso_packet(miso_bytes); 
+        let (_, reg): (SpiStatus, VMAX) = parse_packet(miso_bytes); 
         assert_eq!(0x345678, reg.value());
     }
 }
