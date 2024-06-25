@@ -30,12 +30,10 @@ where
     }
 
     #[inline(always)]
-    pub fn read<Reg: Register>(&mut self, data: &mut Reg) -> Result<SpiStatus, Spi::Error> {
-        let address = data.get_address();
+    pub fn read<Reg: Register>(&mut self) -> Result<(SpiStatus,Reg), Spi::Error> {
+        let address = Reg::ADDRESS;
         let data_bytes = self.read_impl(address)?;
-        let (status, reg_data): (SpiStatus, Reg) = parse_packet(data_bytes);
-        *data = reg_data;
-        Ok(status)
+        Ok(parse_packet(data_bytes))
     }
 
     fn write_impl(&mut self, address: u8, tx_data: [u8; 4]) -> Result<SpiStatus, Spi::Error> {

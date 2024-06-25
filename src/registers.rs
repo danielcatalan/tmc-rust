@@ -4,6 +4,7 @@ use modular_bitfield::specifiers::*;
 
 pub trait Register
 {
+    const ADDRESS: u8;
     fn get_address(&self) -> u8;
     fn get_bytes(&self) -> [u8;4];
     fn from_bytes(data: [u8;4]) -> Self;
@@ -13,8 +14,9 @@ pub trait Register
 macro_rules! make_register {
     ($name: ident, $address: literal) => {
         impl Register for $name {
+            const ADDRESS: u8 = $address;
             fn get_address(&self) -> u8{
-                $address
+                Self::ADDRESS
             } 
 
             fn get_bytes(&self) -> [u8;4]{
