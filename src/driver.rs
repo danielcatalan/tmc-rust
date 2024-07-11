@@ -32,13 +32,14 @@ where
     #[inline(always)]
     pub fn read<Reg: Register>(&mut self) -> Result<(SpiStatus,Reg), Spi::Error> {
         let address = Reg::ADDRESS;
-        let data_bytes = self.read_impl(address)?;
-        Ok(parse_packet(data_bytes))
+        let (status, miso_data) = self.read_impl(address)?;
+
+        Ok((status, Reg::from_bytes(miso_data)))
     }
 
     fn write_impl(&mut self, address: u8, tx_data: [u8; 4]) -> Result<SpiStatus, Spi::Error> {
         let op = Operation::Write;
-        let mosi_packet = create_packet(address, op, tx_data);
+        let mosi_packet = create_mosi_packet(address, op, tx_data);
         let mut miso_packet: [u8; 5] = [0x00; 5];
 
         self.spi.transfer(&mut miso_packet, &mosi_packet)?;
@@ -46,24 +47,16 @@ where
         Ok(SpiStatus::from(miso_packet[0]))
     }
 
-    fn read_impl(&mut self, address: u8) -> Result<[u8;5], Spi::Error> {
+    fn read_impl(&mut self, address: u8) -> Result<(SpiStatus, [u8;4]), Spi::Error> {
         let op = Operation::Read;
         let tx_data: [u8;4] = [0x00;4];
-        let mosi_packet = create_packet(address, op, tx_data);
+        let mosi_packet = create_mosi_packet(address, op, tx_data);
         let mut miso_packet: [u8; 5] = [0x00; 5];
 
         self.spi.transfer(&mut miso_packet, &mosi_packet)?;
 
-        Ok(miso_packet)
+        Ok(parse_miso_packet(miso_packet))
     }
-}
-
-#[inline(always)]
-fn parse_packet<Reg: Register>(data_bytes: [u8;5]) -> (SpiStatus, Reg){
-
-    let (status, bytes) = parse_miso_packet(data_bytes);
-
-    (status, Reg::from_bytes(bytes))
 }
 
 fn parse_miso_packet(data_bytes: [u8;5]) -> (SpiStatus, [u8;4]){
@@ -74,7 +67,7 @@ fn parse_miso_packet(data_bytes: [u8;5]) -> (SpiStatus, [u8;4]){
     (status, data)
 }
 
-fn create_packet(address: u8, op: Operation, tx_data: [u8; 4]) -> [u8; 5] {
+fn create_mosi_packet(address: u8, op: Operation, tx_data: [u8; 4]) -> [u8; 5] {
     let mut buf: [u8; 5] = [0; 5];
     buf[0] = (op as u8) | address;
 
@@ -102,7 +95,7 @@ mod tests {
         let addr = reg.get_address();
         let tx_data = reg.get_bytes();
         let op = Operation::Write;
-        let packet = create_packet(addr, op, tx_data);
+        let packet = create_mosi_packet(addr, op, tx_data);
         assert_eq!(packet, [0xA7, 0x00, 0x12, 0x34, 0x56]);
     }
 
@@ -118,7 +111,7 @@ mod tests {
         let addr = reg.get_address();
         let tx_data = reg.get_bytes();
         let op = Operation::Read;
-        let packet = create_packet(addr, op, tx_data);
+        let packet = create_mosi_packet(addr, op, tx_data);
         assert_eq!(packet, [0x21, 0x00, 0x00, 0x00, 0x00]);
     }
 
@@ -127,7 +120,8 @@ mod tests {
 
         let miso_bytes:[u8; 5] = [0xA5, 0x12, 0x34, 0x56, 0x78];
 
-        let (status, reg): (SpiStatus, XACTUAL) = parse_packet(miso_bytes); 
+        let (status, reg) = parse_miso_packet(miso_bytes); 
+        let reg = XACTUAL::from_bytes(reg);
         assert_eq!(0x12345678, reg.value());
 
         assert_eq!(1, status.reset_flag());
@@ -138,8 +132,5 @@ mod tests {
         assert_eq!(1, status.position_reached());
         assert_eq!(0, status.status_stop_l());
         assert_eq!(1, status.status_stop_r());
-
-        let (_, reg): (SpiStatus, VMAX) = parse_packet(miso_bytes); 
-        assert_eq!(0x345678, reg.value());
     }
 }
