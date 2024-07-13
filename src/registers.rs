@@ -55,10 +55,15 @@ pub struct GCONF {
 }
 make_register!(GCONF, 0x00);
 
+/// Global status flags
 #[bitfield]
 pub struct GSTAT {
+    /// Indicates that the IC has been reset
     pub reset: B1,
+    /// Indicates, that the driver has been shut down
+    /// due to overtemperature or short circuit detection.
     pub drv_err: B1,
+    /// Indicates an undervoltage on the charge pump.
     pub uv_cp: B1,
     #[skip]
     reserved: B29,
