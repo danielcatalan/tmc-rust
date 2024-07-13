@@ -1,13 +1,11 @@
 use modular_bitfield::bitfield;
 use modular_bitfield::specifiers::*;
 
-
-pub trait Register
-{
+pub trait Register {
     const ADDRESS: u8;
     fn get_address(&self) -> u8;
-    fn get_bytes(&self) -> [u8;4];
-    fn from_bytes(data: [u8;4]) -> Self;
+    fn get_bytes(&self) -> [u8; 4];
+    fn from_bytes(data: [u8; 4]) -> Self;
 }
 
 #[macro_export]
@@ -15,17 +13,17 @@ macro_rules! make_register {
     ($name: ident, $address: literal) => {
         impl Register for $name {
             const ADDRESS: u8 = $address;
-            fn get_address(&self) -> u8{
+            fn get_address(&self) -> u8 {
                 Self::ADDRESS
-            } 
+            }
 
-            fn get_bytes(&self) -> [u8;4]{
-                let mut values: [u8;4] = [0;4];
+            fn get_bytes(&self) -> [u8; 4] {
+                let mut values: [u8; 4] = [0; 4];
                 values.copy_from_slice(&self.bytes);
                 values
             }
 
-            fn from_bytes(data: [u8;4]) -> $name {
+            fn from_bytes(data: [u8; 4]) -> $name {
                 $name::from_bytes(data)
             }
         }
@@ -33,8 +31,7 @@ macro_rules! make_register {
 }
 
 #[bitfield]
-pub struct GCONF
-{  
+pub struct GCONF {
     pub recalibrate: B1,
     pub faststandstill: B1,
     pub en_pwm_mode: B1,
@@ -54,33 +51,38 @@ pub struct GCONF
     pub direct_mode: B1,
     pub test_mode: B1,
     #[skip]
-    reserved: B14
+    reserved: B14,
 }
-
 make_register!(GCONF, 0x00);
 
-
+#[bitfield]
+pub struct GSTAT {
+    pub reset: B1,
+    pub drv_err: B1,
+    pub uv_cp: B1,
+    #[skip]
+    reserved: B29,
+}
+make_register!(GSTAT, 0x01);
 
 #[bitfield]
-pub struct GlobalScaler
-{
+pub struct GlobalScaler {
     pub globalscaler: B8,
     #[skip]
-    reserved: B24
+    reserved: B24,
 }
 
 #[bitfield]
-pub struct XACTUAL{
-    pub value: B32
+pub struct XACTUAL {
+    pub value: B32,
 }
 make_register!(XACTUAL, 0x21);
 
 #[bitfield]
-pub struct VMAX
-{
+pub struct VMAX {
     pub value: B23,
     #[skip]
-    reserved: B9
+    reserved: B9,
 }
 make_register!(VMAX, 0x27);
 
@@ -101,7 +103,25 @@ mod tests {
 
         let addr = reg1.get_address();
         assert_eq!(0x00, addr);
-        
+    }
+
+    #[test]
+    fn test_gstat() {
+        let mut reg = GSTAT::new();
+        reg.set_reset(1);
+        reg.set_drv_err(0);
+        reg.set_uv_cp(1);
+
+        let val = reg.get_bytes();
+        assert_eq!([0x5_u8, 0x0_u8, 0x0, 0x00], val);
+
+        let reg = GSTAT::from_bytes([0x02, 0x00, 0x00, 0x00]);
+        assert_eq!(0, reg.reset());
+        assert_eq!(1, reg.drv_err());
+        assert_eq!(0, reg.uv_cp());
+
+        let addr = reg.get_address();
+        assert_eq!(0x01, addr);
     }
 
     #[test]
@@ -111,8 +131,7 @@ mod tests {
 
         assert_eq!(0x55, reg.globalscaler());
 
-        
-        let data: [u8;4] = reg.into_bytes();
+        let data: [u8; 4] = reg.into_bytes();
         assert_eq!([0x55, 0x00, 0x00, 0x00], data);
     }
 }
