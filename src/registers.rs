@@ -30,7 +30,7 @@ pub struct GCONF {
     pub direct_mode: B1,
     pub test_mode: B1,
     #[skip]
-    reserved: B14,
+    __: B14,
 }
 make_register!(GCONF, 0x00);
 
@@ -45,15 +45,61 @@ pub struct GSTAT {
     /// Indicates an undervoltage on the charge pump.
     pub uv_cp: B1,
     #[skip]
-    reserved: B29,
+    __: B29,
 }
 make_register!(GSTAT, 0x01);
+
+/// Interface transmission counter. This register becomes
+/// incremented with each successful UART interface write access.
+/// It can be read out to check the serial transmission for lost
+/// data. Read accesses do not change the content. Disabled in SPI
+/// operation. The counter wraps around from 255 to 0
+#[bitfield]
+pub struct IFCNT {
+    #[skip(setters)]
+    pub value: B8,
+    #[skip]
+    __: B24,
+}
+make_register!(IFCNT, 0x02);
+
+#[bitfield]
+pub struct SLAVECONF {
+    ///These eight bits set the address of unit for the UART
+    /// interface. The address becomes incremented by one
+    /// when the external address pin NEXTADDR is active.
+    /// Range: 0-253 (254 cannot be incremented), default=0
+    pub slave_addr: B8,
+    pub send_delay: B4,
+    #[skip]
+    __: B20,
+}
+make_register!(SLAVECONF, 0x03);
+
+/// Reads the state of all input pins available
+#[bitfield]
+pub struct IOIN {
+    pub refl_step: B1,
+    pub refr_dir: B1,
+    pub encb_dcen_cfg4: B1,
+    pub enca_dcin_cfg5: B1,
+    pub drv_enn: B1,
+    pub enc_n_dco_cfg6: B1,
+    pub sd_mode: B1,
+    pub swcomp_in: B1,
+    #[skip]
+    __: B16,
+    ///VERSION: 0x30=first version of the IC
+    /// Identical numbers mean full digital compatibility
+    pub version: B8,
+}
+make_register!(IOIN, 0x04);
 
 #[bitfield]
 pub struct GlobalScaler {
     pub globalscaler: B8,
     #[skip]
-    reserved: B24,
+    __: B24,
 }
 
 #[bitfield]
@@ -66,7 +112,7 @@ make_register!(XACTUAL, 0x21);
 pub struct VMAX {
     pub value: B23,
     #[skip]
-    reserved: B9,
+    __: B9,
 }
 make_register!(VMAX, 0x27);
 
@@ -106,6 +152,13 @@ mod tests {
 
         let addr = reg.get_address();
         assert_eq!(0x01, addr);
+    }
+
+    #[test]
+    fn test_ifcnt() {
+        let data = [0x55, 0xFF, 0xFF, 0xFF];
+        let reg = IFCNT::from_bytes(data);
+        assert_eq!(0x55, reg.value());
     }
 
     #[test]
