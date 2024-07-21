@@ -1,5 +1,5 @@
 macro_rules! fields {
-    ($name:ident; $t:ty, <$shift:literal>; $($rest:tt)*) => {
+    ($name:ident: $t:ty, <$shift:literal>; $($rest:tt)*) => {
         pub fn $name(&self) -> $t {
             ((self.0 >> $shift) & 0xFF) as u8
         }
@@ -25,8 +25,8 @@ mod tests {
     use super::*;
     register! {
         MyRegister {
-            slave_addr; u8, <0>;
-            send_delay; u8, <8>;
+            slave_addr: u8, <0>;
+            send_delay: u8, <8>;
         }
     }
 
