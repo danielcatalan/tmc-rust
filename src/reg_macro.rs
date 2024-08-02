@@ -1,8 +1,24 @@
+pub use paste::paste;
+
+pub trait Register {
+    const ADDRESS: u8;
+    fn get_address(&self) -> u8;
+    fn get_bytes(&self) -> [u8; 4];
+    fn from_bytes(data: [u8; 4]) -> Self;
+}
+
 macro_rules! fields {
     ($name:ident: $t:ty, <$shift:literal>; $($rest:tt)*) => {
 
         pub fn $name(&self) -> $t {
             ((self.0 >> $shift) & 0x01) as u8
+        }
+
+        paste!{
+        pub fn [<set_ $name>](&mut self, value: u8){
+            let value = (value & 0x01) << $shift;
+            self.0 = self.0 | (value as u32);
+        }
         }
 
         fields!($($rest)*);
@@ -12,15 +28,34 @@ macro_rules! fields {
 }
 
 macro_rules! register {
-    ($qual:vis struct $name:ident (RW) {$($f:tt)*}) => {
+    ($qual:vis struct $name:ident ($address: literal, RW) {$($f:tt)*}) => {
         $qual struct $name(u32);
 
         impl $name{
-            fn new() -> Self{
+
+            pub fn new() -> Self{
                 $name(0)
             }
             
             fields!( $($f)*);
+        }
+
+        impl Register for $name {
+            const ADDRESS: u8 = $address;
+            fn get_address(&self) -> u8 {
+                Self::ADDRESS
+            }
+
+            fn get_bytes(&self) -> [u8; 4] {
+                let mut values: [u8; 4] = [0; 4];
+                let x = self.0;
+                values.copy_from_slice(&x.to_le_bytes());
+                values
+            }
+
+            fn from_bytes(data: [u8; 4]) -> $name {
+                $name::from_bytes(data)
+            }
         }
     };
 }
@@ -29,7 +64,7 @@ macro_rules! register {
 mod tests {
     use super::*;
     register! {
-        struct MyRegister (RW) {
+        struct MyRegister (0x00, RW) {
             slave_addr: u8, <0>;
             send_delay: u8, <2>;
         }

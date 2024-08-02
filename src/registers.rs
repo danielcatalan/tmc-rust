@@ -2,16 +2,10 @@ use crate::utils::make_register;
 use modular_bitfield::bitfield;
 use modular_bitfield::specifiers::*;
 use crate::reg_macro::*;
-
-pub trait Register {
-    const ADDRESS: u8;
-    fn get_address(&self) -> u8;
-    fn get_bytes(&self) -> [u8; 4];
-    fn from_bytes(data: [u8; 4]) -> Self;
-}
+pub use crate::reg_macro::Register;
 
 register!{
-    pub struct GCONF (RW) {
+    pub struct GCONF (0x00, RW) {
         recalibrate: u8, <0>;
 
         // pub faststandstill: B1,
@@ -36,7 +30,7 @@ register!{
     }
 }
 
-make_register!(GCONF, 0x00);
+// make_register!(GCONF, 0x00);
 
 /// Global status flags
 #[bitfield]
@@ -127,13 +121,13 @@ mod tests {
     #[test]
     fn test_gconf() {
         let mut reg1 = GCONF::new();
-
+        reg1.set_recalibrate(1);
         // reg1.set_recalibrate(1);
         // reg1.set_shaft(1);
         // reg1.set_diag1_stall_dir(1);
         // reg1.set_test_mode(1);
         let val = reg1.get_bytes();
-        assert_eq!([0x11_u8, 0x01_u8, 0x02, 0x00], val);
+        assert_eq!([0x01, 0x00, 0x00, 0x00], val);
 
         let addr = reg1.get_address();
         assert_eq!(0x00, addr);
