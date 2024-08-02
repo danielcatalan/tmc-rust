@@ -1,6 +1,7 @@
 use crate::utils::make_register;
 use modular_bitfield::bitfield;
 use modular_bitfield::specifiers::*;
+use crate::reg_macro::*;
 
 pub trait Register {
     const ADDRESS: u8;
@@ -9,29 +10,32 @@ pub trait Register {
     fn from_bytes(data: [u8; 4]) -> Self;
 }
 
-#[bitfield]
-pub struct GCONF {
-    pub recalibrate: B1,
-    pub faststandstill: B1,
-    pub en_pwm_mode: B1,
-    pub multistep_filt: B1,
-    pub shaft: B1,
-    pub diag0_error: B1,
-    pub diag0_otpw: B1,
-    pub diag0_stall_step: B1,
-    pub diag1_stall_dir: B1,
-    pub diag1_index: B1,
-    pub diag1_onstate: B1,
-    pub diag1_steps_skipped: B1,
-    pub diag0_int_pushpull: B1,
-    pub diag1_poscomp_pushpull: B1,
-    pub small_hstesis: B1,
-    pub stop_enable: B1,
-    pub direct_mode: B1,
-    pub test_mode: B1,
-    #[skip]
-    __: B14,
+register!{
+    pub struct GCONF (RW) {
+        recalibrate: u8, <0>;
+
+        // pub faststandstill: B1,
+        // pub en_pwm_mode: B1,
+        // pub multistep_filt: B1,
+        // pub shaft: B1,
+        // pub diag0_error: B1,
+        // pub diag0_otpw: B1,
+        // pub diag0_stall_step: B1,
+        // pub diag1_stall_dir: B1,
+        // pub diag1_index: B1,
+        // pub diag1_onstate: B1,
+        // pub diag1_steps_skipped: B1,
+        // pub diag0_int_pushpull: B1,
+        // pub diag1_poscomp_pushpull: B1,
+        // pub small_hstesis: B1,
+        // pub stop_enable: B1,
+        // pub direct_mode: B1,
+        // pub test_mode: B1,
+        // #[skip]
+        // __: B14,
+    }
 }
+
 make_register!(GCONF, 0x00);
 
 /// Global status flags
@@ -124,10 +128,10 @@ mod tests {
     fn test_gconf() {
         let mut reg1 = GCONF::new();
 
-        reg1.set_recalibrate(1);
-        reg1.set_shaft(1);
-        reg1.set_diag1_stall_dir(1);
-        reg1.set_test_mode(1);
+        // reg1.set_recalibrate(1);
+        // reg1.set_shaft(1);
+        // reg1.set_diag1_stall_dir(1);
+        // reg1.set_test_mode(1);
         let val = reg1.get_bytes();
         assert_eq!([0x11_u8, 0x01_u8, 0x02, 0x00], val);
 

@@ -16,6 +16,10 @@ macro_rules! register {
         $qual struct $name(u32);
 
         impl $name{
+            fn new() -> Self{
+                $name(0)
+            }
+            
             fields!( $($f)*);
         }
     };
@@ -52,3 +56,4 @@ mod tests {
 }
 
 pub(crate) use register;
+pub(crate) use fields;
