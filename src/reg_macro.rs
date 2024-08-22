@@ -11,13 +11,13 @@ macro_rules! fields {
     ($name:ident: $t:ty, <$shift:literal>; $($rest:tt)*) => {
 
         pub fn $name(&self) -> $t {
-            ((self.0 >> $shift) & 0x01) as u8
+            ((self.raw_data >> $shift) & 0x01) as u8
         }
 
         paste!{
         pub fn [<set_ $name>](&mut self, value: u8){
             let value = (value & 0x01) << $shift;
-            self.0 = self.0 | (value as u32);
+            self.raw_data = self.raw_data | (value as u32);
         }
         }
 
@@ -29,12 +29,14 @@ macro_rules! fields {
 
 macro_rules! register {
     ($qual:vis struct $name:ident ($address: literal, RW) {$($f:tt)*}) => {
-        $qual struct $name(u32);
+        $qual struct $name{
+            raw_data: u32
+        }
 
         impl $name{
 
             pub fn new() -> Self{
-                $name(0)
+                $name{raw_data:0}
             }
             
             fields!( $($f)*);
@@ -48,7 +50,7 @@ macro_rules! register {
 
             fn get_bytes(&self) -> [u8; 4] {
                 let mut values: [u8; 4] = [0; 4];
-                let x = self.0;
+                let x = self.raw_data;
                 values.copy_from_slice(&x.to_le_bytes());
                 values
             }
@@ -72,19 +74,19 @@ mod tests {
 
     #[test]
     fn test_name() {
-        let x = MyRegister(0x00);
+        let x = MyRegister{raw_data:0x00};
         assert_eq!(0, x.send_delay());
         assert_eq!(0, x.slave_addr());
 
-        let x = MyRegister(0x01);
+        let x = MyRegister{raw_data:0x01};
         assert_eq!(0, x.send_delay());
         assert_eq!(1, x.slave_addr());
 
-        let x = MyRegister(0x04);
+        let x = MyRegister{raw_data:0x04};
         assert_eq!(1, x.send_delay());
         assert_eq!(0, x.slave_addr());
 
-        let x = MyRegister(0x05);
+        let x = MyRegister{raw_data:0x05};
         assert_eq!(1, x.send_delay());
         assert_eq!(1, x.slave_addr());
     }
