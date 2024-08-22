@@ -56,7 +56,9 @@ macro_rules! register {
             }
 
             fn from_bytes(data: [u8; 4]) -> $name {
-                $name::from_bytes(data)
+                $name {
+                    raw_data: u32::from_le_bytes(data)
+                }
             }
         }
     };
