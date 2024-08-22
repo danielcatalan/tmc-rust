@@ -6,10 +6,10 @@ pub use crate::reg_macro::Register;
 
 register!{
     pub struct GCONF (0x00, RW) {
-        recalibrate:    u8, <0>;
-        faststandstill: u8, <1>;
-        en_pwm_mode:    u8, <2>;
-        multistep_filt: u8, <3>;
+        recalibrate:    u8, <0>,
+        faststandstill: u8, <1>,
+        en_pwm_mode:    u8, <2>,
+        multistep_filt: u8, <3>,
         // pub shaft: B1,
         // pub diag0_error: B1,
         // pub diag0_otpw: B1,

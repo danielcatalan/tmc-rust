@@ -8,7 +8,7 @@ pub trait Register {
 }
 
 macro_rules! fields {
-    ($name:ident: $t:ty, <$shift:literal>; $($rest:tt)*) => {
+    ($name:ident: $t:ty, <$shift:literal>, $($rest:tt)*) => {
 
         pub fn $name(&self) -> $t {
             ((self.raw_data >> $shift) & 0x01) as u8
@@ -67,8 +67,8 @@ mod tests {
     use super::*;
     register! {
         struct MyRegister (0x00, RW) {
-            slave_addr: u8, <0>;
-            send_delay: u8, <2>;
+            slave_addr: u8, <0>,
+            send_delay: u8, <2>,
         }
     }
 
