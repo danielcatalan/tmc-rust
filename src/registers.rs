@@ -6,11 +6,10 @@ pub use crate::reg_macro::Register;
 
 register!{
     pub struct GCONF (0x00, RW) {
-        recalibrate: u8, <0>;
-
-        // pub faststandstill: B1,
-        // pub en_pwm_mode: B1,
-        // pub multistep_filt: B1,
+        recalibrate:    u8, <0>;
+        faststandstill: u8, <1>;
+        en_pwm_mode:    u8, <2>;
+        multistep_filt: u8, <3>;
         // pub shaft: B1,
         // pub diag0_error: B1,
         // pub diag0_otpw: B1,
@@ -122,12 +121,16 @@ mod tests {
     fn test_gconf() {
         let mut reg1 = GCONF::new();
         reg1.set_recalibrate(1);
-        // reg1.set_recalibrate(1);
+        let val = reg1.get_bytes();
+        assert_eq!([0x01, 0x00, 0x00, 0x00], val);
+        
+        reg1.set_faststandstill(1);
+        let val = reg1.get_bytes();
+        assert_eq!([0x03, 0x00, 0x00, 0x00], val);
         // reg1.set_shaft(1);
         // reg1.set_diag1_stall_dir(1);
         // reg1.set_test_mode(1);
-        let val = reg1.get_bytes();
-        assert_eq!([0x01, 0x00, 0x00, 0x00], val);
+
 
         let addr = reg1.get_address();
         assert_eq!(0x00, addr);
