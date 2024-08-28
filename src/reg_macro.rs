@@ -8,7 +8,7 @@ pub trait Register {
 }
 
 macro_rules! fields {
-    ($name:ident: $t:ty, <$shift:literal>, $($rest:tt)*) => {
+    ($name:ident: $t:ty, <$shift:literal>, $($rest:tt)*) => { // eg: name: u8, <4>, ...
 
         pub fn $name(&self) -> $t {
             ((self.raw_data >> $shift) & 0x01) as u8
@@ -16,8 +16,9 @@ macro_rules! fields {
 
         paste!{
         pub fn [<set_ $name>](&mut self, value: u8){
-            let value = (value & 0x01) << $shift;
-            self.raw_data = self.raw_data | (value as u32);
+            const BIT_MASK: u32 = 0x01 << $shift;
+            let value = ((value as u32) & 0x01) << $shift;
+            self.raw_data = (self.raw_data & !BIT_MASK) | value; // clear bits
         }
         }
 
@@ -38,7 +39,7 @@ macro_rules! register {
             pub fn new() -> Self{
                 $name{raw_data:0}
             }
-            
+
             fields!( $($f)*);
         }
 
@@ -76,23 +77,29 @@ mod tests {
 
     #[test]
     fn test_name() {
-        let x = MyRegister{raw_data:0x00};
+        let mut x = MyRegister::new();
+        x.raw_data = 0;
         assert_eq!(0, x.send_delay());
         assert_eq!(0, x.slave_addr());
 
-        let x = MyRegister{raw_data:0x01};
+        x.set_slave_addr(1);
+        assert_eq!(0x01, x.raw_data);
         assert_eq!(0, x.send_delay());
         assert_eq!(1, x.slave_addr());
 
-        let x = MyRegister{raw_data:0x04};
+        x.set_slave_addr(0);
+        x.set_send_delay(1);
+        assert_eq!(0x04, x.raw_data);
         assert_eq!(1, x.send_delay());
         assert_eq!(0, x.slave_addr());
 
-        let x = MyRegister{raw_data:0x05};
+        x.set_slave_addr(1);
+        x.set_send_delay(1);
+        assert_eq!(0x05, x.raw_data);
         assert_eq!(1, x.send_delay());
         assert_eq!(1, x.slave_addr());
     }
 }
 
-pub(crate) use register;
 pub(crate) use fields;
+pub(crate) use register;
