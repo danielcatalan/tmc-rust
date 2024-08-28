@@ -1,31 +1,29 @@
+pub use crate::reg_macro::Register;
+use crate::reg_macro::*;
 use crate::utils::make_register;
 use modular_bitfield::bitfield;
 use modular_bitfield::specifiers::*;
-use crate::reg_macro::*;
-pub use crate::reg_macro::Register;
 
-register!{
+register! {
     pub struct GCONF (0x00, RW) {
-        recalibrate:      u8, <0>,
-        faststandstill:   u8, <1>,
-        en_pwm_mode:      u8, <2>,
-        multistep_filt:   u8, <3>,
-        shaft:            u8, <4>,
-        diag0_error:      u8, <5>,
-        diag0_otpw:       u8, <6>,
-        diag0_stall_step: u8, <7>,
-        diag1_stall_dir:  u8, <8>,
-        // pub diag1_index: B1,
-        // pub diag1_onstate: B1,
-        // pub diag1_steps_skipped: B1,
-        // pub diag0_int_pushpull: B1,
-        // pub diag1_poscomp_pushpull: B1,
-        // pub small_hstesis: B1,
-        // pub stop_enable: B1,
-        // pub direct_mode: B1,
-        // pub test_mode: B1,
-        // #[skip]
-        // __: B14,
+        recalibrate:            u8, <0>,
+        faststandstill:         u8, <1>,
+        en_pwm_mode:            u8, <2>,
+        multistep_filt:         u8, <3>,
+        shaft:                  u8, <4>,
+        diag0_error:            u8, <5>,
+        diag0_otpw:             u8, <6>,
+        diag0_stall_step:       u8, <7>,
+        diag1_stall_dir:        u8, <8>,
+        diag1_index:            u8, <9>,
+        diag1_onstate:          u8, <10>,
+        diag1_steps_skipped:    u8, <11>,
+        diag0_int_pushpull:     u8, <12>,
+        diag1_poscomp_pushpull: u8, <13>,
+        small_hystesis:         u8, <14>,
+        stop_enable:            u8, <15>,
+        direct_mode:            u8, <16>,
+        test_mode:              u8, <17>,
     }
 }
 
@@ -123,14 +121,13 @@ mod tests {
         reg1.set_recalibrate(1);
         let val = reg1.get_bytes();
         assert_eq!([0x01, 0x00, 0x00, 0x00], val);
-        
+
         reg1.set_faststandstill(1);
         let val = reg1.get_bytes();
         assert_eq!([0x03, 0x00, 0x00, 0x00], val);
         // reg1.set_shaft(1);
         // reg1.set_diag1_stall_dir(1);
         // reg1.set_test_mode(1);
-
 
         let addr = reg1.get_address();
         assert_eq!(0x00, addr);
