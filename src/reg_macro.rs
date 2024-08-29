@@ -7,29 +7,12 @@ pub trait Register {
     fn from_bytes(data: [u8; 4]) -> Self;
 }
 
-macro_rules! fields {
-    ($name:ident: $t:ty, <$shift:literal>, $($rest:tt)*) => { // eg: name: u8, <4>, ...
-
-        pub fn $name(&self) -> $t {
-            ((self.raw_data >> $shift) & 0x01) as u8
-        }
-
-        paste!{
-        pub fn [<set_ $name>](&mut self, value: u8){
-            const BIT_MASK: u32 = 0x01 << $shift;
-            let value = ((value as u32) & 0x01) << $shift;
-            self.raw_data = (self.raw_data & !BIT_MASK) | value; // clear bits
-        }
-        }
-
-        fields!($($rest)*);
-    };
-
-    () => {};
-}
-
 macro_rules! register {
     ($qual:vis struct $name:ident ($address: literal, RW) {$($f:tt)*}) => {
+        register!(BASE, $qual, $name, $address, fields!($($f)*); );
+    };
+
+    (BASE, $qual:vis, $name:ident, $address: literal,  $($f:tt)* ) => {
         $qual struct $name{
             raw_data: u32
         }
@@ -40,7 +23,7 @@ macro_rules! register {
                 $name{raw_data:0}
             }
 
-            fields!( $($f)*);
+            $($f)*
         }
 
         impl Register for $name {
@@ -65,13 +48,35 @@ macro_rules! register {
     };
 }
 
+macro_rules! fields {
+    ($name:ident: $t:ty | <$shift:literal>, $($rest:tt)*) => {
+        // eg: name: u8, <4>, ...
+
+        pub fn $name(&self) -> $t {
+            ((self.raw_data >> $shift) & 0x01) as u8
+        }
+
+        paste! {
+        pub fn [<set_ $name>](&mut self, value: u8){
+            const BIT_MASK: u32 = 0x01 << $shift;
+            let value = ((value as u32) & 0x01) << $shift;
+            self.raw_data = (self.raw_data & !BIT_MASK) | value; // clear bits
+        }
+        }
+
+        fields!($($rest)*);
+    };
+
+    () => {};
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     register! {
         struct MyRegister (0x00, RW) {
-            slave_addr: u8, <0>,
-            send_delay: u8, <2>,
+            slave_addr: u8 | <0>,
+            send_delay: u8 | <2>,
         }
     }
 
@@ -100,6 +105,5 @@ mod tests {
         assert_eq!(1, x.slave_addr());
     }
 }
-
 pub(crate) use fields;
 pub(crate) use register;

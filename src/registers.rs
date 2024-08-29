@@ -6,43 +6,39 @@ use modular_bitfield::specifiers::*;
 
 register! {
     pub struct GCONF (0x00, RW) {
-        recalibrate:            u8, <0>,
-        faststandstill:         u8, <1>,
-        en_pwm_mode:            u8, <2>,
-        multistep_filt:         u8, <3>,
-        shaft:                  u8, <4>,
-        diag0_error:            u8, <5>,
-        diag0_otpw:             u8, <6>,
-        diag0_stall_step:       u8, <7>,
-        diag1_stall_dir:        u8, <8>,
-        diag1_index:            u8, <9>,
-        diag1_onstate:          u8, <10>,
-        diag1_steps_skipped:    u8, <11>,
-        diag0_int_pushpull:     u8, <12>,
-        diag1_poscomp_pushpull: u8, <13>,
-        small_hystesis:         u8, <14>,
-        stop_enable:            u8, <15>,
-        direct_mode:            u8, <16>,
-        test_mode:              u8, <17>,
+        recalibrate:            u8 | <0>,
+        faststandstill:         u8 | <1>,
+        en_pwm_mode:            u8 | <2>,
+        multistep_filt:         u8 | <3>,
+        shaft:                  u8 | <4>,
+        diag0_error:            u8 | <5>,
+        diag0_otpw:             u8 | <6>,
+        diag0_stall_step:       u8 | <7>,
+        diag1_stall_dir:        u8 | <8>,
+        diag1_index:            u8 | <9>,
+        diag1_onstate:          u8 | <10>,
+        diag1_steps_skipped:    u8 | <11>,
+        diag0_int_pushpull:     u8 | <12>,
+        diag1_poscomp_pushpull: u8 | <13>,
+        small_hystesis:         u8 | <14>,
+        stop_enable:            u8 | <15>,
+        direct_mode:            u8 | <16>,
+        test_mode:              u8 | <17>,
     }
 }
 
-// make_register!(GCONF, 0x00);
-
-/// Global status flags
-#[bitfield]
-pub struct GSTAT {
-    /// Indicates that the IC has been reset
-    pub reset: B1,
-    /// Indicates, that the driver has been shut down
-    /// due to overtemperature or short circuit detection.
-    pub drv_err: B1,
-    /// Indicates an undervoltage on the charge pump.
-    pub uv_cp: B1,
-    #[skip]
-    __: B29,
+// Global status flags
+register! {
+    pub struct GSTAT (0x01, RW){ // TODO: change this to RWC
+        // Indicates that the IC has been reset
+        reset: u8 | <0>,
+        // Indicates, that the driver has been shut down
+        // due to overtemperature or short circuit detection.
+        drv_err: u8 | <1>,
+        // Indicates an undervoltage on the charge pump.
+        uv_cp: u8 | <2>,
+    }
 }
-make_register!(GSTAT, 0x01);
 
 /// Interface transmission counter. This register becomes
 /// incremented with each successful UART interface write access.
