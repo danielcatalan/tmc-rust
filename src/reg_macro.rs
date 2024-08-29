@@ -8,10 +8,16 @@ pub trait Register {
 }
 
 macro_rules! register {
+    // Read/Write Register
     ($qual:vis struct $name:ident ($address: literal, RW) {$($f:tt)*}) => {
         register!(BASE, $qual, $name, $address, fields!($($f)*); );
     };
 
+    // Read/Write-clear register
+    ($qual:vis struct $name:ident ($address: literal, RWC) {$($f:tt)*}) => {
+        register!(BASE, $qual, $name, $address, fields!(RWC $($f)* ); );
+    };
+    // Base for all Regiters 
     (BASE, $qual:vis, $name:ident, $address: literal,  $($f:tt)* ) => {
         $qual struct $name{
             raw_data: u32
@@ -49,6 +55,25 @@ macro_rules! register {
 }
 
 macro_rules! fields {
+    (RWC $name:ident: $t:ty | <$shift:literal>, $($rest:tt)* ) => {
+        // eg: "name: u8 | <4>,"
+
+        pub fn $name(&self) -> $t {
+            ((self.raw_data >> $shift) & 0x01) as u8
+        }
+
+        paste! {
+        pub fn [<clear_ $name>](&mut self,){
+            const BIT_MASK: u32 = 0x01 << $shift;
+            self.raw_data = (self.raw_data & !BIT_MASK) 
+        }
+        }
+
+        fields!(RWC $($rest)* );
+    };
+
+    (RWC) => {};
+
     ($name:ident: $t:ty | <$shift:literal>, $($rest:tt)*) => {
         // eg: name: u8, <4>, ...
 
@@ -67,6 +92,8 @@ macro_rules! fields {
         fields!($($rest)*);
     };
 
+
+
     () => {};
 }
 
@@ -74,36 +101,61 @@ macro_rules! fields {
 mod tests {
     use super::*;
     register! {
-        struct MyRegister (0x00, RW) {
-            slave_addr: u8 | <0>,
-            send_delay: u8 | <2>,
+        struct RwRegister (0x00, RW) {
+            a: u8 | <0>,
+            b: u8 | <2>,
         }
     }
 
     #[test]
-    fn test_name() {
-        let mut x = MyRegister::new();
+    fn test_rw() {
+        let mut x = RwRegister::new();
         x.raw_data = 0;
-        assert_eq!(0, x.send_delay());
-        assert_eq!(0, x.slave_addr());
+        assert_eq!(0, x.b());
+        assert_eq!(0, x.a());
 
-        x.set_slave_addr(1);
+        x.set_a(1);
         assert_eq!(0x01, x.raw_data);
-        assert_eq!(0, x.send_delay());
-        assert_eq!(1, x.slave_addr());
+        assert_eq!(0, x.b());
+        assert_eq!(1, x.a());
 
-        x.set_slave_addr(0);
-        x.set_send_delay(1);
+        x.set_a(0);
+        x.set_b(1);
         assert_eq!(0x04, x.raw_data);
-        assert_eq!(1, x.send_delay());
-        assert_eq!(0, x.slave_addr());
+        assert_eq!(1, x.b());
+        assert_eq!(0, x.a());
 
-        x.set_slave_addr(1);
-        x.set_send_delay(1);
+        x.set_a(1);
+        x.set_b(1);
         assert_eq!(0x05, x.raw_data);
-        assert_eq!(1, x.send_delay());
-        assert_eq!(1, x.slave_addr());
+        assert_eq!(1, x.b());
+        assert_eq!(1, x.a());
     }
+
+    register! {
+        struct RwcRegister (0x00, RWC) {
+            a: u8 | <0>,
+            b: u8 | <2>,
+        }
+    }
+    #[test]
+    fn test_rwc() {
+        let mut x = RwcRegister::new();
+        x.raw_data = 0x05;
+        assert_eq!(1, x.a());
+        assert_eq!(1, x.b());
+        x.clear_a();
+        assert_eq!(0, x.a());
+        assert_eq!(1, x.b());
+        x.raw_data = 0x05;
+        x.clear_b();
+        assert_eq!(1, x.a());
+        assert_eq!(0, x.b());
+        x.clear_a();
+        assert_eq!(0, x.a());
+        assert_eq!(0, x.b());
+    }
+
 }
 pub(crate) use fields;
 pub(crate) use register;
