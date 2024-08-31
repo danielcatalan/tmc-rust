@@ -1,3 +1,4 @@
+pub use crate::utils::create_mask;
 pub use paste::paste;
 
 pub trait Register {
@@ -17,7 +18,7 @@ macro_rules! register {
     ($qual:vis struct $name:ident ($address: literal, RWC) {$($f:tt)*}) => {
         register!(BASE, $qual, $name, $address, fields!(RWC $($f)* ); );
     };
-    // Base for all Regiters 
+    // Base for all Regiters
     (BASE, $qual:vis, $name:ident, $address: literal,  $($f:tt)* ) => {
         $qual struct $name{
             raw_data: u32
@@ -55,6 +56,38 @@ macro_rules! register {
 }
 
 macro_rules! fields {
+    // for regiters with no fields with 1bit representation
+    (self: $t:ty | <$shift:literal>,) => {
+        // eg: name: u8, <4>, ...
+
+        pub fn value(&self) -> $t {
+            ((self.raw_data >> $shift) & 0x01) as u8
+        }
+
+
+        pub fn set_value(&mut self, value: u8){
+            const BIT_MASK: u32 = 0x01 << $shift;
+            let value = ((value as u32) & 0x01) << $shift;
+            self.raw_data = (self.raw_data & !BIT_MASK) | value; // clear bits
+        }
+    };
+    // for regiters with no fields with multi-bit representation
+    (self: $t:ty | <$lsb:literal..$msb:literal>,) => {
+        // eg: name: u8, <4>, ...
+
+        pub fn value(&self) -> $t {
+            const MASK: u32 = create_mask($lsb, $msb);
+            ((self.raw_data >> $lsb) & MASK) as u8
+        }
+
+
+        // pub fn set_value(&mut self, value: u8){
+        //     const BIT_MASK: u32 = 0x01 << $shift;
+        //     let value = ((value as u32) & 0x01) << $shift;
+        //     self.raw_data = (self.raw_data & !BIT_MASK) | value; // clear bits
+        // }
+    };
+
     (RWC $name:ident: $t:ty | <$shift:literal>, $($rest:tt)* ) => {
         // eg: "name: u8 | <4>,"
 
@@ -65,7 +98,7 @@ macro_rules! fields {
         paste! {
         pub fn [<clear_ $name>](&mut self,){
             const BIT_MASK: u32 = 0x01 << $shift;
-            self.raw_data = (self.raw_data & !BIT_MASK) 
+            self.raw_data = (self.raw_data & !BIT_MASK)
         }
         }
 
@@ -155,7 +188,6 @@ mod tests {
         assert_eq!(0, x.a());
         assert_eq!(0, x.b());
     }
-
 }
 pub(crate) use fields;
 pub(crate) use register;

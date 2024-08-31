@@ -1,5 +1,6 @@
 pub use crate::reg_macro::Register;
 use crate::reg_macro::*;
+
 use crate::utils::make_register;
 use modular_bitfield::bitfield;
 use modular_bitfield::specifiers::*;
@@ -29,7 +30,7 @@ register! {
 
 // Global status flags
 register! {
-    pub struct GSTAT (0x01, RW){ // TODO: change this to RWC
+    pub struct GSTAT (0x01, RWC){ // TODO: change this to RWC
         // Indicates that the IC has been reset
         reset: u8 | <0>,
         // Indicates, that the driver has been shut down
@@ -40,19 +41,16 @@ register! {
     }
 }
 
-/// Interface transmission counter. This register becomes
-/// incremented with each successful UART interface write access.
-/// It can be read out to check the serial transmission for lost
-/// data. Read accesses do not change the content. Disabled in SPI
-/// operation. The counter wraps around from 255 to 0
-#[bitfield]
-pub struct IFCNT {
-    #[skip(setters)]
-    pub value: B8,
-    #[skip]
-    __: B24,
+// Interface transmission counter. This register becomes
+// incremented with each successful UART interface write access.
+// It can be read out to check the serial transmission for lost
+// data. Read accesses do not change the content. Disabled in SPI
+// operation. The counter wraps around from 255 to 0
+register! {
+    pub struct IFCNT (0x02, RW) {
+        self: u8 | <0..7>,
+    }
 }
-make_register!(IFCNT, 0x02);
 
 #[bitfield]
 pub struct SLAVECONF {
@@ -132,9 +130,10 @@ mod tests {
     #[test]
     fn test_gstat() {
         let mut reg = GSTAT::new();
-        reg.set_reset(1);
-        reg.set_drv_err(0);
-        reg.set_uv_cp(1);
+        reg.raw_data = 0x05;
+        assert_eq!(1, reg.reset());
+        assert_eq!(0, reg.drv_err());
+        assert_eq!(1, reg.uv_cp());
 
         let val = reg.get_bytes();
         assert_eq!([0x5_u8, 0x0_u8, 0x0, 0x00], val);

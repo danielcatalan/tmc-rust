@@ -20,3 +20,9 @@ macro_rules! make_register {
 }
 
 pub(crate) use make_register;
+
+pub const fn create_mask(lsb: u8, msb: u8) -> u32 {
+    let bits = (msb + 1) - lsb;
+    let mask = 2u32.pow(bits as u32) - 1;
+    mask << lsb
+}
