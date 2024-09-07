@@ -23,6 +23,8 @@ macro_rules! register {
     // Base for all Regiters
     (BASE, $(#[$attr:meta])*, $qual:vis, $name:ident, $address: literal, $($f:tt)* ) => {
         $(#[$attr])*
+        #[doc = "\nRegister Address: "]
+        #[doc = stringify!($address)]
         $qual struct $name{
             raw_data: u32
         }
