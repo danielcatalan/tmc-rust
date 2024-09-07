@@ -110,9 +110,9 @@ macro_rules! fields {
 
     (RWC) => {};
 
-    (RW $name:ident: $t:ty | <$shift:literal>, $($rest:tt)*) => {
+    (RW $(#[$attr:meta])* $name:ident: $t:ty | <$shift:literal>, $($rest:tt)*) => {
         // eg: name: u8, <4>, ...
-
+        $(#[$attr])*
         pub fn $name(&self) -> $t {
             ((self.raw_data >> $shift) & 0x01) as u8
         }

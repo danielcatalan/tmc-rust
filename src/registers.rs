@@ -8,6 +8,7 @@ use modular_bitfield::specifiers::*;
 register! {
     /// Global Configurations flags
     pub struct GCONF (0x00, RW) {
+        /// Zero crossing recalibration during driver disable
         recalibrate:            u8 | <0>,
         faststandstill:         u8 | <1>,
         en_pwm_mode:            u8 | <2>,
