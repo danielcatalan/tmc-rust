@@ -10,16 +10,17 @@ pub trait Register {
 
 macro_rules! register {
     // Read/Write Register
-    ($qual:vis struct $name:ident ($address: literal, RW) {$($f:tt)*}) => {
-        register!(BASE, $qual, $name, $address, fields!($($f)*); );
+    ($qual:vis struct $name:ident ($address: literal, $reg_type: ident) {$($f:tt)*}) => {
+        register!(BASE, $qual, $name, $address, fields!($reg_type $($f)*); );
     };
 
-    // Read/Write-clear register
-    ($qual:vis struct $name:ident ($address: literal, RWC) {$($f:tt)*}) => {
-        register!(BASE, $qual, $name, $address, fields!(RWC $($f)* ); );
-    };
+    // // Read/Write-clear register
+    // ($qual:vis struct $name:ident ($address: literal, RWC) {$($f:tt)*}) => {
+    //     register!(BASE, $qual, $name, $address, fields!(RWC $($f)* ); );
+    // };
+
     // Base for all Regiters
-    (BASE, $qual:vis, $name:ident, $address: literal,  $($f:tt)* ) => {
+    (BASE, $qual:vis, $name:ident, $address: literal, $($f:tt)* ) => {
         $qual struct $name{
             raw_data: u32
         }
@@ -57,7 +58,7 @@ macro_rules! register {
 
 macro_rules! fields {
     // for regiters with no fields with 1bit representation
-    (self: $t:ty | <$shift:literal>,) => {
+    ($reg_type: ident self: $t:ty | <$shift:literal>,) => {
         // eg: name: u8, <4>, ...
 
         pub fn value(&self) -> $t {
@@ -72,7 +73,7 @@ macro_rules! fields {
         }
     };
     // for regiters with no fields with multi-bit representation
-    (self: $t:ty | <$lsb:literal..$msb:literal>,) => {
+    ($reg_type: ident self: $t:ty | <$lsb:literal..$msb:literal>,) => {
         // eg: name: u8, <4>, ...
 
         pub fn value(&self) -> $t {
@@ -107,7 +108,7 @@ macro_rules! fields {
 
     (RWC) => {};
 
-    ($name:ident: $t:ty | <$shift:literal>, $($rest:tt)*) => {
+    (RW $name:ident: $t:ty | <$shift:literal>, $($rest:tt)*) => {
         // eg: name: u8, <4>, ...
 
         pub fn $name(&self) -> $t {
@@ -122,11 +123,10 @@ macro_rules! fields {
         }
         }
 
-        fields!($($rest)*);
+        fields!(RW $($rest)*);
     };
 
-
-
+    (RW) => {};
     () => {};
 }
 
