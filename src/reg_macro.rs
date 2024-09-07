@@ -10,8 +10,9 @@ pub trait Register {
 
 macro_rules! register {
     // Read/Write Register
-    ($qual:vis struct $name:ident ($address: literal, $reg_type: ident) {$($f:tt)*}) => {
-        register!(BASE, $qual, $name, $address, fields!($reg_type $($f)*); );
+    ($(#[$attr:meta])*
+        $qual:vis struct $name:ident ($address: literal, $reg_type: ident) {$($f:tt)*}) => {
+        register!(BASE, $(#[$attr])*, $qual, $name, $address, fields!($reg_type $($f)*); );
     };
 
     // // Read/Write-clear register
@@ -20,7 +21,8 @@ macro_rules! register {
     // };
 
     // Base for all Regiters
-    (BASE, $qual:vis, $name:ident, $address: literal, $($f:tt)* ) => {
+    (BASE, $(#[$attr:meta])*, $qual:vis, $name:ident, $address: literal, $($f:tt)* ) => {
+        $(#[$attr])*
         $qual struct $name{
             raw_data: u32
         }

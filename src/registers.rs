@@ -6,6 +6,7 @@ use modular_bitfield::bitfield;
 use modular_bitfield::specifiers::*;
 
 register! {
+    /// Global Configurations flags
     pub struct GCONF (0x00, RW) {
         recalibrate:            u8 | <0>,
         faststandstill:         u8 | <1>,
