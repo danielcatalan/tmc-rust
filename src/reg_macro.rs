@@ -114,12 +114,20 @@ macro_rules! fields {
 
     (RW $(#[$attr:meta])* $name:ident: $t:ty | <$shift:literal>, $($rest:tt)*) => {
         // eg: name: u8, <4>, ...
+        #[doc="gets field `"]
+        #[doc=stringify!($name)]
+        #[doc="`.\n\n"]
         $(#[$attr])*
         pub fn $name(&self) -> $t {
             ((self.raw_data >> $shift) & 0x01) as u8
         }
 
+
         paste! {
+        #[doc="sets field `"]
+        #[doc=stringify!($name)]
+        #[doc="`.\n\n"]
+        $(#[$attr])*
         pub fn [<set_ $name>](&mut self, value: u8){
             const BIT_MASK: u32 = 0x01 << $shift;
             let value = ((value as u32) & 0x01) << $shift;
