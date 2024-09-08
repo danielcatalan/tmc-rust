@@ -9,10 +9,25 @@ register! {
     /// Global Configurations flags
     pub struct GCONF (0x00, RW) {
         /// Zero crossing recalibration during driver disable
+        ///
+        /// 1: Zero crossing recalibration during driver disable
+        /// (via DRV_ENN or via TOFF setting)
         recalibrate:            u8 | <0>,
+        /// Timeout for step execution until standstill detection:
+        ///
+        /// 1: Short time: 2^18 clocks
+        ///
+        /// 0: Normal time: 2^20 clocks
         faststandstill:         u8 | <1>,
+        /// 1: StealthChop voltage PWM mode enabled
+        /// (depending on velocity thresholds). Switch from
+        /// off to on state while in stand-still and at IHOLD=
+        /// nominal IRUN current, only
         en_pwm_mode:            u8 | <2>,
+        /// 1: Enable step input filtering for StealthChop
+        /// optimization with external step source (default=1)
         multistep_filt:         u8 | <3>,
+        /// 1: Inverse motor direction
         shaft:                  u8 | <4>,
         diag0_error:            u8 | <5>,
         diag0_otpw:             u8 | <6>,

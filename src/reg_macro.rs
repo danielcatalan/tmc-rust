@@ -23,8 +23,9 @@ macro_rules! register {
     // Base for all Regiters
     (BASE, $(#[$attr:meta])*, $qual:vis, $name:ident, $address: literal, $($f:tt)* ) => {
         $(#[$attr])*
-        #[doc = "\nRegister Address: "]
+        #[doc = "(Address="]
         #[doc = stringify!($address)]
+        #[doc = ")"]
         $qual struct $name{
             raw_data: u32
         }
@@ -114,7 +115,7 @@ macro_rules! fields {
 
     (RW $(#[$attr:meta])* $name:ident: $t:ty | <$shift:literal>, $($rest:tt)*) => {
         // eg: name: u8, <4>, ...
-        #[doc="gets field `"]
+        #[doc="Gets field `"]
         #[doc=stringify!($name)]
         #[doc="`.\n\n"]
         $(#[$attr])*
@@ -124,7 +125,7 @@ macro_rules! fields {
 
 
         paste! {
-        #[doc="sets field `"]
+        #[doc="Sets field `"]
         #[doc=stringify!($name)]
         #[doc="`.\n\n"]
         $(#[$attr])*
