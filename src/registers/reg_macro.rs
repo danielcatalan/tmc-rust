@@ -95,12 +95,10 @@ macro_rules! fields {
         // }
     };
 
-    (RWC $name:ident: $t:ty | <$shift:literal>, $($rest:tt)* ) => {
+    (RWC $(#[$attr:meta])* $name:ident: $t:ty | <$shift:literal>, $($rest:tt)* ) => {
         // eg: "name: u8 | <4>,"
 
-        pub fn $name(&self) -> $t {
-            ((self.raw_data >> $shift) & 0x01) as u8
-        }
+        getter!($(#[$attr])*, $name, $t, $shift);
 
         paste! {
         pub fn [<clear_ $name>](&mut self,){
@@ -115,6 +113,20 @@ macro_rules! fields {
     (RWC) => {};
 
     (RW $(#[$attr:meta])* $name:ident: $t:ty | <$shift:literal>, $($rest:tt)*) => {
+
+        getter!($(#[$attr])*, $name, $t, $shift);
+
+        setter!($(#[$attr])*, $name, $t, $shift);
+
+        fields!(RW $($rest)*);
+    };
+
+    (RW) => {};
+    () => {};
+}
+
+macro_rules! getter {
+    ($(#[$attr:meta])*, $name:ident, $t:ty , $shift:literal) => {
         // eg: name: u8, <4>, ...
         #[doc="Gets field `"]
         #[doc=stringify!($name)]
@@ -123,25 +135,24 @@ macro_rules! fields {
         pub fn $name(&self) -> $t {
             <$t>::from_u32((self.raw_data >> $shift) & 0x01)
         }
-
-
-        paste! {
-        #[doc="Sets field `"]
-        #[doc=stringify!($name)]
-        #[doc="`.\n\n"]
-        $(#[$attr])*
-        pub fn [<set_ $name>](&mut self, value: u8){
-            const BIT_MASK: u32 = 0x01 << $shift;
-            let value = ((value.to_u32()) & 0x01) << $shift;
-            self.raw_data = (self.raw_data & !BIT_MASK) | value; // clear bits
-        }
-        }
-
-        fields!(RW $($rest)*);
     };
+}
 
-    (RW) => {};
-    () => {};
+macro_rules! setter {
+    ($(#[$attr:meta])*, $name:ident, $t:ty , $shift:literal) => {
+        // eg: name: u8, <4>, ...
+        paste! {
+            #[doc="Sets field `"]
+            #[doc=stringify!($name)]
+            #[doc="`.\n\n"]
+            $(#[$attr])*
+            pub fn [<set_ $name>](&mut self, value: $t){
+                const BIT_MASK: u32 = 0x01 << $shift;
+                let value = ((value.to_u32()) & 0x01) << $shift;
+                self.raw_data = (self.raw_data & !BIT_MASK) | value; // clear bits
+            }
+            }
+    };
 }
 
 #[cfg(test)]
@@ -204,4 +215,6 @@ mod tests {
     }
 }
 pub(crate) use fields;
+pub(crate) use getter;
 pub(crate) use register;
+pub(crate) use setter;
