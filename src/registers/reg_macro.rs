@@ -66,17 +66,7 @@ macro_rules! fields {
     // for regiters with no fields with 1bit representation
     ($reg_type: ident self: $t:ty | <$shift:literal>,) => {
         // eg: name: u8, <4>, ...
-
-        pub fn value(&self) -> $t {
-            ((self.raw_data >> $shift) & 0x01) as u8
-        }
-
-
-        pub fn set_value(&mut self, value: u8){
-            const BIT_MASK: u32 = 0x01 << $shift;
-            let value = ((value as u32) & 0x01) << $shift;
-            self.raw_data = (self.raw_data & !BIT_MASK) | value; // clear bits
-        }
+        fields($reg_type value: $t | <$shift>,);
     };
     // for regiters with no fields with multi-bit representation
     ($reg_type: ident self: $t:ty | <$lsb:literal..$msb:literal>,) => {
