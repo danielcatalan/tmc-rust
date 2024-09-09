@@ -33,7 +33,18 @@ register! {
         multistep_filt:         u8 | <3>,
         /// 1: Inverse motor direction
         shaft:                  u8 | <4>,
+        /// (only with SD_MODE=1)
+        ///
+        /// 1: Enable DIAG0 active on driver errors:
+        /// Over temperature (ot), short to GND (s2g)
+        ///
+        /// DIAG0 always shows the reset-status, i.e., is active low
+        /// during reset condition.
         diag0_error:            u8 | <5>,
+        /// (only with SD_MODE=1)
+        ///
+        /// 1: Enable DIAG0 active on driver over temperature
+        /// prewarning (otpw)
         diag0_otpw:             u8 | <6>,
         diag0_stall_step:       u8 | <7>,
         diag1_stall_dir:        u8 | <8>,
