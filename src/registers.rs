@@ -1,5 +1,7 @@
+mod convert;
 mod reg_macro;
 mod utils;
+
 pub use reg_macro::Register;
 use reg_macro::*;
 

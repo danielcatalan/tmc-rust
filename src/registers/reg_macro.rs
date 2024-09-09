@@ -1,5 +1,6 @@
 pub use paste::paste;
 // use utils::create_mask;
+pub use crate::registers::convert::*;
 
 pub trait Register {
     const ADDRESS: u8;
@@ -120,7 +121,7 @@ macro_rules! fields {
         #[doc="`.\n\n"]
         $(#[$attr])*
         pub fn $name(&self) -> $t {
-            ((self.raw_data >> $shift) & 0x01) as u8
+            <$t>::from_u32((self.raw_data >> $shift) & 0x01)
         }
 
 
@@ -131,7 +132,7 @@ macro_rules! fields {
         $(#[$attr])*
         pub fn [<set_ $name>](&mut self, value: u8){
             const BIT_MASK: u32 = 0x01 << $shift;
-            let value = ((value as u32) & 0x01) << $shift;
+            let value = ((value.to_u32()) & 0x01) << $shift;
             self.raw_data = (self.raw_data & !BIT_MASK) | value; // clear bits
         }
         }
