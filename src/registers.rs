@@ -1,9 +1,11 @@
-pub use crate::reg_macro::Register;
-use crate::reg_macro::*;
+mod reg_macro;
+mod utils;
+pub use reg_macro::Register;
+use reg_macro::*;
 
-use crate::utils::make_register;
 use modular_bitfield::bitfield;
 use modular_bitfield::specifiers::*;
+use utils::{create_mask, make_register};
 
 register! {
     /// Global Configurations flags

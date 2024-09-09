@@ -1,6 +1,6 @@
 use embedded_hal::spi::SpiDevice;
 
-use crate::Register;
+use crate::registers::Register;
 use crate::SpiStatus;
 
 // for reference: https://www.analog.com/media/en/technical-documentation/data-sheets/TMC5160A_datasheet_rev1.17.pdf
@@ -30,7 +30,7 @@ where
     }
 
     #[inline(always)]
-    pub fn read<Reg: Register>(&mut self) -> Result<(SpiStatus,Reg), Spi::Error> {
+    pub fn read<Reg: Register>(&mut self) -> Result<(SpiStatus, Reg), Spi::Error> {
         let address = Reg::ADDRESS;
         let (status, miso_data) = self.read_impl(address)?;
 
@@ -47,9 +47,9 @@ where
         Ok(SpiStatus::from(miso_packet[0]))
     }
 
-    fn read_impl(&mut self, address: u8) -> Result<(SpiStatus, [u8;4]), Spi::Error> {
+    fn read_impl(&mut self, address: u8) -> Result<(SpiStatus, [u8; 4]), Spi::Error> {
         let op = Operation::Read;
-        let tx_data: [u8;4] = [0x00;4];
+        let tx_data: [u8; 4] = [0x00; 4];
         let mosi_packet = create_mosi_packet(address, op, tx_data);
         let mut miso_packet: [u8; 5] = [0x00; 5];
 
@@ -59,9 +59,9 @@ where
     }
 }
 
-fn parse_miso_packet(data_bytes: [u8;5]) -> (SpiStatus, [u8;4]){
+fn parse_miso_packet(data_bytes: [u8; 5]) -> (SpiStatus, [u8; 4]) {
     let status = SpiStatus::from(data_bytes[0]);
-    let mut data: [u8;4] = [0x00; 4];
+    let mut data: [u8; 4] = [0x00; 4];
     data.clone_from_slice(&data_bytes[1..]);
     data.reverse();
     (status, data)
@@ -81,7 +81,7 @@ fn create_mosi_packet(address: u8, op: Operation, tx_data: [u8; 4]) -> [u8; 5] {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{VMAX, XACTUAL};
+    use crate::registers::{VMAX, XACTUAL};
 
     #[test]
     fn test_write_packet() {
@@ -116,11 +116,10 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_miso(){
+    fn test_parse_miso() {
+        let miso_bytes: [u8; 5] = [0xA5, 0x12, 0x34, 0x56, 0x78];
 
-        let miso_bytes:[u8; 5] = [0xA5, 0x12, 0x34, 0x56, 0x78];
-
-        let (status, reg) = parse_miso_packet(miso_bytes); 
+        let (status, reg) = parse_miso_packet(miso_bytes);
         let reg = XACTUAL::from_bytes(reg);
         assert_eq!(0x12345678, reg.value());
 
