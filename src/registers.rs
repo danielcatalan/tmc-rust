@@ -46,7 +46,29 @@ register! {
         /// 1: Enable DIAG0 active on driver over temperature
         /// prewarning (otpw)
         diag0_otpw:             u8 | <6>,
+        /// diag0_stall (with SD_MODE=1)
+        ///
+        /// 1: Enable DIAG0 active on motor stall (set
+        /// TCOOLTHRS before using this feature)
+        ///
+        /// diag0_step (with SD_MODE=0)
+        ///
+        /// 0: DIAG0 outputs interrupt signal
+        ///
+        /// 1: Enable DIAG0 as STEP output (half frequency,
+        /// dual edge triggered) for external STEP/DIR driver
         diag0_stall_step:       u8 | <7>,
+        /// diag1_stall (with SD_MODE=1)
+        ///
+        /// 1: Enable DIAG1 active on motor stall (set
+        /// TCOOLTHRS before using this feature)
+        ///
+        /// diag1_dir (with SD_MODE=0)
+        ///
+        /// 0: DIAG1 outputs position compare signal
+        ///
+        /// 1: Enable DIAG1 as DIR output for external STEP/DIR
+        /// driver
         diag1_stall_dir:        u8 | <8>,
         diag1_index:            u8 | <9>,
         diag1_onstate:          u8 | <10>,
