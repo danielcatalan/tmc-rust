@@ -98,9 +98,41 @@ register! {
         ///
         /// 1: Enable SWP_DIAG1 push pull output (active high)
         diag1_poscomp_pushpull: u8 | <13>,
+        /// small_hysteresis 
+        /// 
+        /// 0: Hysteresis for step frequency comparison is 1/16 
+        /// 
+        /// 1: Hysteresis for step frequency comparison is 1/32 
         small_hystesis:         u8 | <14>,
+        /// stop_enable
+        /// 
+        /// 0:  Normal operation
+        /// 
+        /// 1: Emergency stop: ENCA_DCIN stops the sequencer when tied high (no steps become executed by the sequencer, motor goes to standstill state). 
         stop_enable:            u8 | <15>,
+        /// direct_mode 
+        /// 
+        /// 0:  Normal operation 
+        /// 
+        /// 1: Motor coil currents and polarity directly
+        /// programmed via serial interface: Register XTARGET
+        /// (0x2D) specifies signed coil A current (bits 8..0)
+        /// and coil B current (bits 24..16). In this mode, the
+        /// current is scaled by IHOLD setting. Velocity based
+        /// current regulation of StealthChop is not available
+        /// in this mode. The automatic StealthChop current
+        /// regulation will work only for low stepper motor
+        /// velocities. 
         direct_mode:            u8 | <16>,
+        /// test_mode
+        /// 
+        /// 0:  Normal operation
+        /// 
+        /// 1: Enable analog test output on pin ENCN_DCO.
+        /// IHOLD[1..0] selects the function of ENCN_DCO:
+        /// 0…2: T120, DAC, VDDH
+        /// 
+        /// Hint: Not for user, set to 0 for normal operation!
         test_mode:              u8 | <17>,
     }
 }
