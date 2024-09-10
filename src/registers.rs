@@ -70,10 +70,33 @@ register! {
         /// 1: Enable DIAG1 as DIR output for external STEP/DIR
         /// driver
         diag1_stall_dir:        u8 | <8>,
+        ///diag1_index (only with SD_MODE=1)
+        ///
+        /// 1: Enable DIAG1 active on index position (microstep
+        /// look up table position 0)
         diag1_index:            u8 | <9>,
+        /// diag1_onstate (only with SD_MODE=1)
+        ///
+        /// 1: Enable DIAG1 active when chopper is on (for the
+        /// coil which is in the second half of the fullstep)
         diag1_onstate:          u8 | <10>,
+        ///diag1_steps_skipped (only with SD_MODE=1)
+        ///
+        /// 1: Enable output toggle when steps are skipped in
+        /// DcStep mode (increment of LOST_STEPS). Do not
+        /// enable in conjunction with other DIAG1 options.
         diag1_steps_skipped:    u8 | <11>,
+        /// diag0_int_pushpull
+        ///
+        /// 0: SWN_DIAG0 is open collector output (active low)
+        ///
+        /// 1: Enable SWN_DIAG0 push pull output (active high)
         diag0_int_pushpull:     u8 | <12>,
+        /// diag1_poscomp_pushpull
+        ///
+        /// 0: SWP_DIAG1 is open collector output (active low)
+        ///
+        /// 1: Enable SWP_DIAG1 push pull output (active high)
         diag1_poscomp_pushpull: u8 | <13>,
         small_hystesis:         u8 | <14>,
         stop_enable:            u8 | <15>,
