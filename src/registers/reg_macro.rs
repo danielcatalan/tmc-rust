@@ -40,6 +40,12 @@ macro_rules! register {
             $($f)*
         }
 
+        impl Default for $name {
+            fn default() -> Self {
+                Self::new()
+            }
+        }
+
         impl Register for $name {
             const ADDRESS: u8 = $address;
             fn get_address(&self) -> u8 {
@@ -93,7 +99,7 @@ macro_rules! fields {
         paste! {
         pub fn [<clear_ $name>](&mut self,){
             const BIT_MASK: u32 = 0x01 << $shift;
-            self.raw_data = (self.raw_data & !BIT_MASK)
+            self.raw_data &= !BIT_MASK
         }
         }
 
