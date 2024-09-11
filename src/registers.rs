@@ -1,7 +1,9 @@
+mod bitstate;
 mod convert;
 mod reg_macro;
 mod utils;
 
+pub use bitstate::BitState;
 pub use reg_macro::Register;
 use reg_macro::*;
 
@@ -16,13 +18,13 @@ register! {
         ///
         /// 1: Zero crossing recalibration during driver disable
         /// (via DRV_ENN or via TOFF setting)
-        recalibrate:            u8 | <0>,
+        recalibrate:            BitState | <0>,
         /// Timeout for step execution until standstill detection:
         ///
         /// 1: Short time: 2^18 clocks
         ///
         /// 0: Normal time: 2^20 clocks
-        faststandstill:         u8 | <1>,
+        faststandstill:         BitState | <1>,
         /// 1: StealthChop voltage PWM mode enabled
         /// (depending on velocity thresholds). Switch from
         /// off to on state while in stand-still and at IHOLD=
@@ -98,22 +100,22 @@ register! {
         ///
         /// 1: Enable SWP_DIAG1 push pull output (active high)
         diag1_poscomp_pushpull: u8 | <13>,
-        /// small_hysteresis 
-        /// 
-        /// 0: Hysteresis for step frequency comparison is 1/16 
-        /// 
-        /// 1: Hysteresis for step frequency comparison is 1/32 
+        /// small_hysteresis
+        ///
+        /// 0: Hysteresis for step frequency comparison is 1/16
+        ///
+        /// 1: Hysteresis for step frequency comparison is 1/32
         small_hystesis:         u8 | <14>,
         /// stop_enable
-        /// 
+        ///
         /// 0:  Normal operation
-        /// 
-        /// 1: Emergency stop: ENCA_DCIN stops the sequencer when tied high (no steps become executed by the sequencer, motor goes to standstill state). 
+        ///
+        /// 1: Emergency stop: ENCA_DCIN stops the sequencer when tied high (no steps become executed by the sequencer, motor goes to standstill state).
         stop_enable:            u8 | <15>,
-        /// direct_mode 
-        /// 
-        /// 0:  Normal operation 
-        /// 
+        /// direct_mode
+        ///
+        /// 0:  Normal operation
+        ///
         /// 1: Motor coil currents and polarity directly
         /// programmed via serial interface: Register XTARGET
         /// (0x2D) specifies signed coil A current (bits 8..0)
@@ -122,16 +124,16 @@ register! {
         /// current regulation of StealthChop is not available
         /// in this mode. The automatic StealthChop current
         /// regulation will work only for low stepper motor
-        /// velocities. 
+        /// velocities.
         direct_mode:            u8 | <16>,
         /// test_mode
-        /// 
+        ///
         /// 0:  Normal operation
-        /// 
+        ///
         /// 1: Enable analog test output on pin ENCN_DCO.
         /// IHOLD[1..0] selects the function of ENCN_DCO:
         /// 0…2: T120, DAC, VDDH
-        /// 
+        ///
         /// Hint: Not for user, set to 0 for normal operation!
         test_mode:              u8 | <17>,
     }
@@ -221,11 +223,15 @@ mod tests {
     #[test]
     fn test_gconf() {
         let mut reg1 = GCONF::new();
-        reg1.set_recalibrate(1);
+        assert!(BitState::Zero == reg1.recalibrate());
+        reg1.set_recalibrate(BitState::One);
+        assert!(BitState::One == reg1.recalibrate());
         let val = reg1.get_bytes();
         assert_eq!([0x01, 0x00, 0x00, 0x00], val);
 
-        reg1.set_faststandstill(1);
+        assert!(BitState::Zero == reg1.faststandstill());
+        reg1.set_faststandstill(BitState::One);
+        assert!(BitState::One == reg1.faststandstill());
         let val = reg1.get_bytes();
         assert_eq!([0x03, 0x00, 0x00, 0x00], val);
         // reg1.set_shaft(1);
