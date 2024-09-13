@@ -1,13 +1,9 @@
 pub use paste::paste;
 // use utils::create_mask;
 pub use crate::registers::convert::*;
+pub use crate::registers::traits::*;
 
-pub trait Register {
-    const ADDRESS: u8;
-    fn get_address(&self) -> u8;
-    fn get_bytes(&self) -> [u8; 4];
-    fn from_bytes(data: [u8; 4]) -> Self;
-}
+
 
 macro_rules! register {
     // Read/Write Register

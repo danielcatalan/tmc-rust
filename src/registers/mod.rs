@@ -2,6 +2,7 @@ mod bitstate;
 mod convert;
 mod reg_macro;
 mod utils;
+mod traits;
 
 pub use bitstate::BitState;
 pub use reg_macro::Register;
