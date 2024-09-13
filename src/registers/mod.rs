@@ -29,12 +29,12 @@ register! {
         /// (depending on velocity thresholds). Switch from
         /// off to on state while in stand-still and at IHOLD=
         /// nominal IRUN current, only
-        en_pwm_mode:            u8 | <2>,
+        en_pwm_mode:            BitState | <2>,
         /// 1: Enable step input filtering for StealthChop
         /// optimization with external step source (default=1)
-        multistep_filt:         u8 | <3>,
+        multistep_filt:         BitState | <3>,
         /// 1: Inverse motor direction
-        shaft:                  u8 | <4>,
+        shaft:                  BitState | <4>,
         /// (only with SD_MODE=1)
         ///
         /// 1: Enable DIAG0 active on driver errors:
@@ -42,12 +42,12 @@ register! {
         ///
         /// DIAG0 always shows the reset-status, i.e., is active low
         /// during reset condition.
-        diag0_error:            u8 | <5>,
+        diag0_error:            BitState | <5>,
         /// (only with SD_MODE=1)
         ///
         /// 1: Enable DIAG0 active on driver over temperature
         /// prewarning (otpw)
-        diag0_otpw:             u8 | <6>,
+        diag0_otpw:             BitState | <6>,
         /// diag0_stall (with SD_MODE=1)
         ///
         /// 1: Enable DIAG0 active on motor stall (set
@@ -59,7 +59,7 @@ register! {
         ///
         /// 1: Enable DIAG0 as STEP output (half frequency,
         /// dual edge triggered) for external STEP/DIR driver
-        diag0_stall_step:       u8 | <7>,
+        diag0_stall_step:       BitState | <7>,
         /// diag1_stall (with SD_MODE=1)
         ///
         /// 1: Enable DIAG1 active on motor stall (set
@@ -71,47 +71,49 @@ register! {
         ///
         /// 1: Enable DIAG1 as DIR output for external STEP/DIR
         /// driver
-        diag1_stall_dir:        u8 | <8>,
+        diag1_stall_dir:        BitState | <8>,
         ///diag1_index (only with SD_MODE=1)
         ///
         /// 1: Enable DIAG1 active on index position (microstep
         /// look up table position 0)
-        diag1_index:            u8 | <9>,
+        diag1_index:            BitState | <9>,
         /// diag1_onstate (only with SD_MODE=1)
         ///
         /// 1: Enable DIAG1 active when chopper is on (for the
         /// coil which is in the second half of the fullstep)
-        diag1_onstate:          u8 | <10>,
+        diag1_onstate:          BitState | <10>,
         ///diag1_steps_skipped (only with SD_MODE=1)
         ///
         /// 1: Enable output toggle when steps are skipped in
         /// DcStep mode (increment of LOST_STEPS). Do not
         /// enable in conjunction with other DIAG1 options.
-        diag1_steps_skipped:    u8 | <11>,
+        diag1_steps_skipped:    BitState | <11>,
         /// diag0_int_pushpull
         ///
         /// 0: SWN_DIAG0 is open collector output (active low)
         ///
         /// 1: Enable SWN_DIAG0 push pull output (active high)
-        diag0_int_pushpull:     u8 | <12>,
+        diag0_int_pushpull:     BitState | <12>,
         /// diag1_poscomp_pushpull
         ///
         /// 0: SWP_DIAG1 is open collector output (active low)
         ///
         /// 1: Enable SWP_DIAG1 push pull output (active high)
-        diag1_poscomp_pushpull: u8 | <13>,
+        diag1_poscomp_pushpull: BitState | <13>,
         /// small_hysteresis
         ///
         /// 0: Hysteresis for step frequency comparison is 1/16
         ///
         /// 1: Hysteresis for step frequency comparison is 1/32
-        small_hystesis:         u8 | <14>,
+        small_hystesis:         BitState | <14>,
         /// stop_enable
         ///
         /// 0:  Normal operation
         ///
-        /// 1: Emergency stop: ENCA_DCIN stops the sequencer when tied high (no steps become executed by the sequencer, motor goes to standstill state).
-        stop_enable:            u8 | <15>,
+        /// 1: Emergency stop: ENCA_DCIN stops the sequencer
+        /// when tied high (no steps become executed by
+        /// the sequencer, motor goes to standstill state).
+        stop_enable:            BitState | <15>,
         /// direct_mode
         ///
         /// 0:  Normal operation
@@ -125,7 +127,7 @@ register! {
         /// in this mode. The automatic StealthChop current
         /// regulation will work only for low stepper motor
         /// velocities.
-        direct_mode:            u8 | <16>,
+        direct_mode:            BitState | <16>,
         /// test_mode
         ///
         /// 0:  Normal operation
@@ -135,13 +137,13 @@ register! {
         /// 0…2: T120, DAC, VDDH
         ///
         /// Hint: Not for user, set to 0 for normal operation!
-        test_mode:              u8 | <17>,
+        test_mode:              BitState | <17>,
     }
 }
 
 // Global status flags
 register! {
-    pub struct GSTAT (0x01, RWC){ // TODO: change this to RWC
+    pub struct GSTAT (0x01, RWC) {
         // Indicates that the IC has been reset
         reset: u8 | <0>,
         // Indicates, that the driver has been shut down
