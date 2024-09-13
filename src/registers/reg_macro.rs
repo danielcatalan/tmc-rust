@@ -9,7 +9,7 @@ macro_rules! register {
     // Read/Write Register
     ($(#[$attr:meta])*
         $qual:vis struct $name:ident ($address: literal, $reg_type: ident) {$($f:tt)*}) => {
-        register!(BASE, $(#[$attr])*, $qual, $name, $address, fields!($reg_type $($f)*); );
+        register!(BASE, $(#[$attr])*, $qual, $name, $address, $reg_type, fields!($reg_type $($f)*); );
     };
 
     // // Read/Write-clear register
@@ -18,7 +18,7 @@ macro_rules! register {
     // };
 
     // Base for all Regiters
-    (BASE, $(#[$attr:meta])*, $qual:vis, $name:ident, $address: literal, $($f:tt)* ) => {
+    (BASE, $(#[$attr:meta])*, $qual:vis, $name:ident, $address: literal, $reg_type: ident, $($f:tt)* ) => {
         $(#[$attr])*
         #[doc = "(Address="]
         #[doc = stringify!($address)]
@@ -61,6 +61,7 @@ macro_rules! register {
                 }
             }
         }
+        traits!($reg_type, $name);
     };
 }
 
@@ -157,6 +158,21 @@ macro_rules! setter {
     };
 }
 
+macro_rules! traits {
+    (RW, $name:ident) => {
+        impl ReadRegister for $name{}
+        impl WriteRegister for $name{}
+    };
+
+    (RWC, $name:ident) => {
+        impl ReadRegister for $name{}
+        impl WriteRegister for $name{}
+    };
+    (RO, $name:ident) => {
+        impl ReadRegister for $name{}
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -220,3 +236,4 @@ pub(crate) use fields;
 pub(crate) use getter;
 pub(crate) use register;
 pub(crate) use setter;
+pub(crate) use traits;
