@@ -1,6 +1,6 @@
 use embedded_hal::spi::SpiDevice;
 
-use crate::registers::Register;
+use crate::registers::{Register,ReadRegister, WriteRegister};
 use crate::SpiStatus;
 
 // for reference: https://www.analog.com/media/en/technical-documentation/data-sheets/TMC5160A_datasheet_rev1.17.pdf

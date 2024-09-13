@@ -5,7 +5,7 @@ mod utils;
 mod traits;
 
 pub use bitstate::BitState;
-pub use reg_macro::Register;
+pub use traits::*;
 use reg_macro::*;
 
 use modular_bitfield::bitfield;
