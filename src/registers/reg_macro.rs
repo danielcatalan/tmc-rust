@@ -96,12 +96,7 @@ macro_rules! fields {
 
         getter!($(#[$attr])*, $name, $t, $shift);
 
-        paste! {
-        pub fn [<clear_ $name>](&mut self,){
-            const BIT_MASK: u32 = 0x01 << $shift;
-            self.raw_data &= !BIT_MASK
-        }
-        }
+        setter!(CLEAR $(#[$attr])*, $name, $t, $shift);
 
         fields!(RWC $($rest)* );
     };
@@ -146,6 +141,21 @@ macro_rules! setter {
                 const BIT_MASK: u32 = 0x01 << $shift;
                 let value = ((value.to_u32()) & 0x01) << $shift;
                 self.raw_data = (self.raw_data & !BIT_MASK) | value; // clear bits
+            }
+            }
+    };
+
+    (CLEAR $(#[$attr:meta])*, $name:ident, $t:ty , $shift:literal) => {
+        // eg: name: u8, <4>, ...
+        paste! {
+            #[doc="Clears field `"]
+            #[doc=stringify!($name)]
+            #[doc="` by setting bit(s) to 1.\n\n"]
+            $(#[$attr])*
+            pub fn [<clear_ $name>](&mut self){
+                const BIT_MASK: u32 = 0x01 << $shift;
+                
+                self.raw_data = self.raw_data | BIT_MASK; // clear bits
             }
             }
     };
@@ -195,19 +205,19 @@ mod tests {
     #[test]
     fn test_rwc() {
         let mut x = RwcRegister::new();
-        x.raw_data = 0x05;
-        assert_eq!(1, x.a());
-        assert_eq!(1, x.b());
-        x.clear_a();
+        x.raw_data = 0x00;
         assert_eq!(0, x.a());
-        assert_eq!(1, x.b());
-        x.raw_data = 0x05;
+        assert_eq!(0, x.b());
+        x.clear_a();
+        assert_eq!(1, x.a());
+        assert_eq!(0, x.b());
+        x.raw_data = 0x00;
         x.clear_b();
-        assert_eq!(1, x.a());
-        assert_eq!(0, x.b());
-        x.clear_a();
         assert_eq!(0, x.a());
-        assert_eq!(0, x.b());
+        assert_eq!(1, x.b());
+        x.clear_a();
+        assert_eq!(1, x.a());
+        assert_eq!(1, x.b());
     }
 }
 pub(crate) use fields;
