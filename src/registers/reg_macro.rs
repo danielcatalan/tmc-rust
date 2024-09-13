@@ -1,5 +1,5 @@
 pub use paste::paste;
-// use utils::create_mask;
+pub use crate::registers::utils::create_mask;
 pub use crate::registers::convert::*;
 pub use crate::registers::traits::*;
 
@@ -67,18 +67,19 @@ macro_rules! register {
 
 macro_rules! fields {
     // for regiters with no fields with 1bit representation
-    ($reg_type: ident self: $t:ty | <$shift:literal>,) => {
+    ($reg_type: ident $(#[$attr:meta])* self: $t:ty | <$shift:literal>,) => {
         // eg: name: u8, <4>, ...
-        fields($reg_type value: $t | <$shift>,);
+        fields($reg_type $(#[$attr])* value: $t | <$shift..$shift>,);
     };
     // for regiters with no fields with multi-bit representation
-    ($reg_type: ident self: $t:ty | <$lsb:literal..$msb:literal>,) => {
+    ($reg_type: ident $(#[$attr:meta])* self: $t:ty | <$lsb:literal..$msb:literal>,) => {
         // eg: name: u8, <4>, ...
 
-        pub fn value(&self) -> $t {
-            const MASK: u32 = create_mask($lsb, $msb);
-            ((self.raw_data >> $lsb) & MASK) as u8
-        }
+        // pub fn value(&self) -> $t {
+        //     const MASK: u32 = create_mask($lsb, $msb);
+        //     ((self.raw_data >> $lsb) & MASK) as u8
+        // }
+        fields!($reg_type $(#[$attr])* value: $t | <$lsb..$msb>,);
 
 
         // pub fn set_value(&mut self, value: u8){
@@ -87,47 +88,64 @@ macro_rules! fields {
         //     self.raw_data = (self.raw_data & !BIT_MASK) | value; // clear bits
         // }
     };
+    
+    ($reg_type: ident $(#[$attr:meta])* $name:ident: $t:ty | <$shift:literal>, $($rest:tt)* ) => {
+        fields!($reg_type $(#[$attr])* $name: $t | <$shift..$shift>, $($rest)* );
+    };
+    
 
-    (RWC $(#[$attr:meta])* $name:ident: $t:ty | <$shift:literal>, $($rest:tt)* ) => {
+    (RWC $(#[$attr:meta])* $name:ident: $t:ty | <$lsb:literal..$msb:literal>, $($rest:tt)* ) => {
         // eg: "name: u8 | <4>,"
 
-        getter!($(#[$attr])*, $name, $t, $shift);
+        getter!($(#[$attr])*, $name, $t, $lsb, $msb);
 
-        setter!(CLEAR $(#[$attr])*, $name, $t, $shift);
+        setter!(CLEAR $(#[$attr])*, $name, $t, $lsb, $msb);
 
         fields!(RWC $($rest)* );
     };
 
     (RWC) => {};
 
-    (RW $(#[$attr:meta])* $name:ident: $t:ty | <$shift:literal>, $($rest:tt)*) => {
+    (RW $(#[$attr:meta])* $name:ident: $t:ty | <$lsb:literal..$msb:literal>, $($rest:tt)*) => {
 
-        getter!($(#[$attr])*, $name, $t, $shift);
+        getter!($(#[$attr])*, $name, $t, $lsb, $msb);
 
-        setter!($(#[$attr])*, $name, $t, $shift);
+        setter!($(#[$attr])*, $name, $t, $lsb, $msb);
 
         fields!(RW $($rest)*);
     };
 
     (RW) => {};
+
+    (RO $(#[$attr:meta])* $name:ident: $t:ty | <$lsb:literal..$msb:literal>, $($rest:tt)*) => {
+
+        getter!($(#[$attr])*, $name, $t, $lsb, $msb);
+
+
+        fields!(RO $($rest)*);
+    };
+
+    (RO) => {};
+
     () => {};
 }
 
 macro_rules! getter {
-    ($(#[$attr:meta])*, $name:ident, $t:ty , $shift:literal) => {
+    ($(#[$attr:meta])*, $name:ident, $t:ty , $lsb:literal, $msb:literal) => {
         // eg: name: u8, <4>, ...
         #[doc="Gets field `"]
         #[doc=stringify!($name)]
         #[doc="`.\n\n"]
         $(#[$attr])*
         pub fn $name(&self) -> $t {
-            <$t>::from_u32((self.raw_data >> $shift) & 0x01)
+            const MASK:u32 = create_mask($lsb, $msb);
+            <$t>::from_u32((self.raw_data & MASK) >> $lsb)
         }
     };
 }
 
 macro_rules! setter {
-    ($(#[$attr:meta])*, $name:ident, $t:ty , $shift:literal) => {
+    ($(#[$attr:meta])*, $name:ident, $t:ty , $lsb:literal, $msb:literal) => {
         // eg: name: u8, <4>, ...
         paste! {
             #[doc="Sets field `"]
@@ -135,14 +153,14 @@ macro_rules! setter {
             #[doc="`.\n\n"]
             $(#[$attr])*
             pub fn [<set_ $name>](&mut self, value: $t){
-                const BIT_MASK: u32 = 0x01 << $shift;
-                let value = ((value.to_u32()) & 0x01) << $shift;
+                const BIT_MASK: u32 = create_mask($lsb,$msb);
+                let value = value.to_u32() << $lsb;
                 self.raw_data = (self.raw_data & !BIT_MASK) | value; // clear bits
             }
             }
     };
 
-    (CLEAR $(#[$attr:meta])*, $name:ident, $t:ty , $shift:literal) => {
+    (CLEAR $(#[$attr:meta])*, $name:ident, $t:ty , $lsb:literal, $msb:literal) => {
         // eg: name: u8, <4>, ...
         paste! {
             #[doc="Clears field `"]
@@ -150,7 +168,7 @@ macro_rules! setter {
             #[doc="` by setting bit(s) to 1.\n\n"]
             $(#[$attr])*
             pub fn [<clear_ $name>](&mut self){
-                const BIT_MASK: u32 = 0x01 << $shift;
+                const BIT_MASK: u32 = create_mask($lsb,$msb);
                 
                 self.raw_data = self.raw_data | BIT_MASK; // clear bits
             }
