@@ -141,26 +141,40 @@ register! {
     }
 }
 
-// Global status flags
+
 register! {
+    /// Global status flags
     pub struct GSTAT (0x01, RWC) {
-        // Indicates that the IC has been reset
-        reset: u8 | <0>,
-        // Indicates, that the driver has been shut down
-        // due to overtemperature or short circuit detection.
-        drv_err: u8 | <1>,
-        // Indicates an undervoltage on the charge pump.
-        uv_cp: u8 | <2>,
+        /// reset
+        /// 
+        /// 1:  Indicates that the IC has been reset. All registers
+        /// have been cleared to reset values. 
+        reset: BitState | <0>,
+        /// drv_err
+        /// 
+        /// 1:  Indicates, that the driver has been shut down
+        /// due to overtemperature or short circuit detection.
+        /// Read DRV_STATUS for details. The flag can only
+        /// be cleared when the temperature is below the
+        /// limit again. 
+        drv_err: BitState | <1>,
+        /// uv_cp
+        /// 
+        /// 1: Indicates an undervoltage on the charge pump.
+        /// The driver is disabled during undervoltage. This
+        /// flag is latched for information. 
+        uv_cp: BitState | <2>,
     }
 }
 
-// Interface transmission counter. This register becomes
-// incremented with each successful UART interface write access.
-// It can be read out to check the serial transmission for lost
-// data. Read accesses do not change the content. Disabled in SPI
-// operation. The counter wraps around from 255 to 0
+
 register! {
-    pub struct IFCNT (0x02, RW) {
+    /// Interface transmission counter. This register becomes
+    /// incremented with each successful UART interface write access.
+    /// It can be read out to check the serial transmission for lost
+    /// data. Read accesses do not change the content. Disabled in SPI
+    /// operation. The counter wraps around from 255 to 0
+    pub struct IFCNT (0x02, RO) {
         self: u8 | <0..7>,
     }
 }
@@ -225,7 +239,7 @@ mod tests {
     #[test]
     fn test_gconf() {
         let mut reg1 = GCONF::new();
-        assert!(BitState::Zero == reg1.recalibrate());
+        assert_eq!(BitState::Zero, reg1.recalibrate());
         reg1.set_recalibrate(BitState::One);
         assert!(BitState::One == reg1.recalibrate());
         let val = reg1.get_bytes();
@@ -248,17 +262,17 @@ mod tests {
     fn test_gstat() {
         let mut reg = GSTAT::new();
         reg.raw_data = 0x05;
-        assert_eq!(1, reg.reset());
-        assert_eq!(0, reg.drv_err());
-        assert_eq!(1, reg.uv_cp());
+        assert_eq!(BitState::One, reg.reset());
+        assert_eq!(BitState::Zero, reg.drv_err());
+        assert_eq!(BitState::One, reg.uv_cp());
 
         let val = reg.get_bytes();
         assert_eq!([0x5_u8, 0x0_u8, 0x0, 0x00], val);
 
         let reg = GSTAT::from_bytes([0x02, 0x00, 0x00, 0x00]);
-        assert_eq!(0, reg.reset());
-        assert_eq!(1, reg.drv_err());
-        assert_eq!(0, reg.uv_cp());
+        assert_eq!(BitState::Zero, reg.reset());
+        assert_eq!(BitState::One, reg.drv_err());
+        assert_eq!(BitState::Zero, reg.uv_cp());
 
         let addr = reg.get_address();
         assert_eq!(0x01, addr);

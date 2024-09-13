@@ -1,6 +1,6 @@
 use crate::registers::convert::Convert;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub enum BitState {
     Zero,
     One,
