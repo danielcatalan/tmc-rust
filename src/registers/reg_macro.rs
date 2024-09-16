@@ -122,6 +122,15 @@ macro_rules! fields {
 
     (RO) => {};
 
+    (WO $(#[$attr:meta])* $name:ident: $t:ty | <$lsb:literal..$msb:literal>, $($rest:tt)*) => {
+
+        setter!($(#[$attr])*, $name, $t, $lsb, $msb);
+
+        fields!(RO $($rest)*);
+    };
+
+    (WO) => {};
+
     () => {};
 }
 
@@ -183,6 +192,9 @@ macro_rules! traits {
     };
     (RO, $name:ident) => {
         impl ReadRegister for $name {}
+    };
+    (WO, $name:ident) => {
+        impl WriteRegister for $name {}
     };
 }
 

@@ -178,18 +178,16 @@ register! {
     }
 }
 
-#[bitfield]
-pub struct SLAVECONF {
-    ///These eight bits set the address of unit for the UART
-    /// interface. The address becomes incremented by one
-    /// when the external address pin NEXTADDR is active.
-    /// Range: 0-253 (254 cannot be incremented), default=0
-    pub slave_addr: B8,
-    pub send_delay: B4,
-    #[skip]
-    __: B20,
+register! {
+    pub struct SLAVECONF (0x03, WO) {
+        ///These eight bits set the address of unit for the UART
+        /// interface. The address becomes incremented by one
+        /// when the external address pin NEXTADDR is active.
+        /// Range: 0-253 (254 cannot be incremented), default=0
+        slave_addr: u8 | <0..7>,
+        send_delay: u8 | <8..11>,
+    }
 }
-make_register!(SLAVECONF, 0x03);
 
 /// Reads the state of all input pins available
 #[bitfield]
