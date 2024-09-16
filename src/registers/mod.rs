@@ -179,6 +179,7 @@ register! {
 }
 
 register! {
+    /// UART Slave Configuration
     pub struct SLAVECONF (0x03, WO) {
         ///These eight bits set the address of unit for the UART
         /// interface. The address becomes incremented by one
@@ -189,24 +190,23 @@ register! {
     }
 }
 
-/// Reads the state of all input pins available
-#[bitfield]
-pub struct IOIN {
-    pub refl_step: B1,
-    pub refr_dir: B1,
-    pub encb_dcen_cfg4: B1,
-    pub enca_dcin_cfg5: B1,
-    pub drv_enn: B1,
-    pub enc_n_dco_cfg6: B1,
-    pub sd_mode: B1,
-    pub swcomp_in: B1,
-    #[skip]
-    __: B16,
-    ///VERSION: 0x30=first version of the IC
-    /// Identical numbers mean full digital compatibility
-    pub version: B8,
+register! {
+    /// Reads the state of all input pins available
+    pub struct IOIN (0x04, RO) {
+        refl_step:       BitState | <0>,
+        refr_dir:        BitState | <1>,
+        encb_dcen_cfg4:  BitState | <2>,
+        enca_dcin_cfg5:  BitState | <3>,
+        drv_enn:         BitState | <4>,
+        enc_n_dco_cfg6:  BitState | <5>,
+        sd_mode:         BitState | <6>,
+        swcomp_in:       BitState | <7>,
+
+        /// VERSION: 0x30=first version of the IC
+        /// Identical numbers mean full digital compatibility
+        version: u8 | <24..31>,
+    }
 }
-make_register!(IOIN, 0x04);
 
 #[bitfield]
 pub struct GlobalScaler {
@@ -291,5 +291,21 @@ mod tests {
 
         let data: [u8; 4] = reg.into_bytes();
         assert_eq!([0x55, 0x00, 0x00, 0x00], data);
+    }
+
+    #[test]
+    fn test_ioin() {
+        let mut reg = IOIN::new();
+
+        reg.raw_data = 0x340000A5;
+        assert_eq!(BitState::One, reg.refl_step());
+        assert_eq!(BitState::Zero, reg.refr_dir());
+        assert_eq!(BitState::One, reg.encb_dcen_cfg4());
+        assert_eq!(BitState::Zero, reg.enca_dcin_cfg5());
+        assert_eq!(BitState::Zero, reg.drv_enn());
+        assert_eq!(BitState::One, reg.enc_n_dco_cfg6());
+        assert_eq!(BitState::Zero, reg.sd_mode());
+
+        assert_eq!(0x34, reg.version());
     }
 }
