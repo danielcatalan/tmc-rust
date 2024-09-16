@@ -1,16 +1,16 @@
 mod bitstate;
 mod convert;
 mod reg_macro;
-mod utils;
 mod traits;
+mod utils;
 
 pub use bitstate::BitState;
-pub use traits::*;
 use reg_macro::*;
+pub use traits::*;
 
 use modular_bitfield::bitfield;
 use modular_bitfield::specifiers::*;
-use utils::{create_mask, make_register};
+use utils::make_register;
 
 register! {
     /// Global Configurations flags
@@ -142,32 +142,30 @@ register! {
     }
 }
 
-
 register! {
     /// Global status flags
     pub struct GSTAT (0x01, RWC) {
         /// reset
-        /// 
+        ///
         /// 1:  Indicates that the IC has been reset. All registers
-        /// have been cleared to reset values. 
+        /// have been cleared to reset values.
         reset: BitState | <0>,
         /// drv_err
-        /// 
+        ///
         /// 1:  Indicates, that the driver has been shut down
         /// due to overtemperature or short circuit detection.
         /// Read DRV_STATUS for details. The flag can only
         /// be cleared when the temperature is below the
-        /// limit again. 
+        /// limit again.
         drv_err: BitState | <1>,
         /// uv_cp
-        /// 
+        ///
         /// 1: Indicates an undervoltage on the charge pump.
         /// The driver is disabled during undervoltage. This
-        /// flag is latched for information. 
+        /// flag is latched for information.
         uv_cp: BitState | <2>,
     }
 }
-
 
 register! {
     /// Interface transmission counter. This register becomes

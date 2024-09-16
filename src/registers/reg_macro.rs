@@ -1,9 +1,7 @@
-pub use paste::paste;
-pub use crate::registers::utils::create_mask;
 pub use crate::registers::convert::*;
 pub use crate::registers::traits::*;
-
-
+pub use crate::registers::utils::create_mask;
+pub use paste::paste;
 
 macro_rules! register {
     // Read/Write Register
@@ -88,18 +86,16 @@ macro_rules! fields {
         //     self.raw_data = (self.raw_data & !BIT_MASK) | value; // clear bits
         // }
     };
-    
+
     ($reg_type: ident $(#[$attr:meta])* $name:ident: $t:ty | <$shift:literal>, $($rest:tt)* ) => {
         fields!($reg_type $(#[$attr])* $name: $t | <$shift..$shift>, $($rest)* );
     };
-    
+
 
     (RWC $(#[$attr:meta])* $name:ident: $t:ty | <$lsb:literal..$msb:literal>, $($rest:tt)* ) => {
         // eg: "name: u8 | <4>,"
 
         getter!($(#[$attr])*, $name, $t, $lsb, $msb);
-
-        setter!(CLEAR $(#[$attr])*, $name, $t, $lsb, $msb);
 
         fields!(RWC $($rest)* );
     };
@@ -120,7 +116,6 @@ macro_rules! fields {
     (RO $(#[$attr:meta])* $name:ident: $t:ty | <$lsb:literal..$msb:literal>, $($rest:tt)*) => {
 
         getter!($(#[$attr])*, $name, $t, $lsb, $msb);
-
 
         fields!(RO $($rest)*);
     };
@@ -169,7 +164,7 @@ macro_rules! setter {
             $(#[$attr])*
             pub fn [<clear_ $name>](&mut self){
                 const BIT_MASK: u32 = create_mask($lsb,$msb);
-                
+
                 self.raw_data = self.raw_data | BIT_MASK; // clear bits
             }
             }
@@ -178,16 +173,16 @@ macro_rules! setter {
 
 macro_rules! traits {
     (RW, $name:ident) => {
-        impl ReadRegister for $name{}
-        impl WriteRegister for $name{}
+        impl ReadRegister for $name {}
+        impl WriteRegister for $name {}
     };
 
     (RWC, $name:ident) => {
-        impl ReadRegister for $name{}
-        impl WriteRegister for $name{}
+        impl ReadRegister for $name {}
+        impl WriteRegister for $name {}
     };
     (RO, $name:ident) => {
-        impl ReadRegister for $name{}
+        impl ReadRegister for $name {}
     };
 }
 
@@ -238,14 +233,13 @@ mod tests {
         x.raw_data = 0x00;
         assert_eq!(0, x.a());
         assert_eq!(0, x.b());
-        x.clear_a();
+        x.raw_data = 0x01;
         assert_eq!(1, x.a());
         assert_eq!(0, x.b());
-        x.raw_data = 0x00;
-        x.clear_b();
+        x.raw_data = 0b0100;
         assert_eq!(0, x.a());
         assert_eq!(1, x.b());
-        x.clear_a();
+        x.raw_data = 0b0101;
         assert_eq!(1, x.a());
         assert_eq!(1, x.b());
     }
