@@ -8,10 +8,6 @@ pub use bitstate::BitState;
 use reg_macro::*;
 pub use traits::*;
 
-use modular_bitfield::bitfield;
-use modular_bitfield::specifiers::*;
-use utils::make_register;
-
 register! {
     /// Global Configurations flags
     pub struct GCONF (0x00, RW) {
@@ -207,25 +203,33 @@ register! {
         version: u8 | <24..31>,
     }
 }
+
 register! {
+    /// Global scaling of Motor current. This value is multiplied
+    /// to the current scaling to adapt a drive to a certain
+    /// motor type. This value should be chosen before tuning
+    /// other settings because it also influences chopper
+    /// hysteresis
     pub struct GlobalScaler (0x0B, WO){
-        self: u8 | <0..7>,
+        /// 0: Full Scale (or write 256)\
+        /// 1 … 31: Not allowed for operation\
+        /// 32 … 255: 32/256 … 255/256 of maximum current.\
+        /// Hint: Values >128 rec
+        value: u8 | <0..7>, // TODO: use concreate type instead of u8.
     }
 }
 
-#[bitfield]
-pub struct XACTUAL {
-    pub value: B32,
+register! {
+    pub struct XACTUAL (0x21, RW) {
+        value: u32 | <0..31>,
+    }
 }
-make_register!(XACTUAL, 0x21);
 
-#[bitfield]
-pub struct VMAX {
-    pub value: B23,
-    #[skip]
-    __: B9,
+register! {
+    pub struct VMAX (0x27, RW) {
+        value: u32 | <0..22>,
+    }
 }
-make_register!(VMAX, 0x27);
 
 #[cfg(test)]
 mod tests {

@@ -31,6 +31,10 @@ macro_rules! register {
                 $name{raw_data:0}
             }
 
+            pub fn from_u32(value: u32) -> Self{
+                $name{raw_data:value}
+            }
+
             $($f)*
         }
 
@@ -242,17 +246,16 @@ mod tests {
     }
     #[test]
     fn test_rwc() {
-        let mut x = RwcRegister::new();
-        x.raw_data = 0x00;
+        let x = RwcRegister::new();
         assert_eq!(0, x.a());
         assert_eq!(0, x.b());
-        x.raw_data = 0x01;
+        let x = RwcRegister::from_u32(0x01);
         assert_eq!(1, x.a());
         assert_eq!(0, x.b());
-        x.raw_data = 0b0100;
+        let x = RwcRegister::from_u32(0b0100);
         assert_eq!(0, x.a());
         assert_eq!(1, x.b());
-        x.raw_data = 0b0101;
+        let x = RwcRegister::from_u32(0b0101);
         assert_eq!(1, x.a());
         assert_eq!(1, x.b());
     }

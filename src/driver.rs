@@ -1,6 +1,6 @@
 use embedded_hal::spi::SpiDevice;
 
-use crate::registers::{Register,ReadRegister, WriteRegister};
+use crate::registers::{ReadRegister, Register, WriteRegister};
 use crate::SpiStatus;
 
 // for reference: https://www.analog.com/media/en/technical-documentation/data-sheets/TMC5160A_datasheet_rev1.17.pdf
@@ -91,7 +91,7 @@ mod tests {
         write VMAX:= 0x00123456 | 0xA700123456         | 0xSS00ABCDEF
          */
 
-        let reg = VMAX::new().with_value(0x123456);
+        let reg = VMAX::from_u32(0x123456);
         let addr = reg.get_address();
         let tx_data = reg.get_bytes();
         let op = Operation::Write;
