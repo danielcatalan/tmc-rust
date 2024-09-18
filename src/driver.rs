@@ -1,6 +1,6 @@
 use embedded_hal::spi::SpiDevice;
 
-use crate::registers::{ReadRegister, Register, WriteRegister};
+use crate::registers::{ReadRegister, WriteRegister};
 use crate::SpiStatus;
 
 // for reference: https://www.analog.com/media/en/technical-documentation/data-sheets/TMC5160A_datasheet_rev1.17.pdf
@@ -22,7 +22,7 @@ where
     Spi: SpiDevice<u8>,
 {
     #[inline(always)]
-    pub fn write<Reg: Register>(&mut self, data: &Reg) -> Result<SpiStatus, Spi::Error> {
+    pub fn write<Reg: WriteRegister>(&mut self, data: &Reg) -> Result<SpiStatus, Spi::Error> {
         let address = data.get_address();
         let tx_data = data.get_bytes();
 
@@ -30,7 +30,7 @@ where
     }
 
     #[inline(always)]
-    pub fn read<Reg: Register>(&mut self) -> Result<(SpiStatus, Reg), Spi::Error> {
+    pub fn read<Reg: ReadRegister>(&mut self) -> Result<(SpiStatus, Reg), Spi::Error> {
         let address = Reg::ADDRESS;
         let (status, miso_data) = self.read_impl(address)?;
 
@@ -81,7 +81,7 @@ fn create_mosi_packet(address: u8, op: Operation, tx_data: [u8; 4]) -> [u8; 5] {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::registers::{VMAX, XACTUAL};
+    use crate::registers::{Register, VMAX, XACTUAL};
 
     #[test]
     fn test_write_packet() {
