@@ -207,12 +207,10 @@ register! {
         version: u8 | <24..31>,
     }
 }
-
-#[bitfield]
-pub struct GlobalScaler {
-    pub globalscaler: B8,
-    #[skip]
-    __: B24,
+register! {
+    pub struct GlobalScaler (0x0B, WO){
+        self: u8 | <0..7>,
+    }
 }
 
 #[bitfield]
@@ -285,11 +283,11 @@ mod tests {
     #[test]
     fn test_gs() {
         let mut reg = GlobalScaler::new();
-        reg.set_globalscaler(0x55);
+        reg.set_value(0x55);
 
-        assert_eq!(0x55, reg.globalscaler());
+        assert_eq!(0x55, reg.value());
 
-        let data: [u8; 4] = reg.into_bytes();
+        let data: [u8; 4] = reg.get_bytes();
         assert_eq!([0x55, 0x00, 0x00, 0x00], data);
     }
 

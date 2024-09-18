@@ -123,6 +123,7 @@ macro_rules! fields {
     (RO) => {};
 
     (WO $(#[$attr:meta])* $name:ident: $t:ty | <$lsb:literal..$msb:literal>, $($rest:tt)*) => {
+        getter!($(#[$attr])*, $name, $t, $lsb, $msb);
 
         setter!($(#[$attr])*, $name, $t, $lsb, $msb);
 
