@@ -23,6 +23,6 @@ fn integration_write_test() -> Result<(), ErrorKind> {
 
     let status = driver.write(&reg)?;
 
-    assert_eq!([0x55], status.into_bytes());
+    assert_eq!(0x55_u8, status.into());
     Ok(())
 }

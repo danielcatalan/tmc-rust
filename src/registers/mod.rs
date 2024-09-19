@@ -2,7 +2,7 @@ mod bitstate;
 mod convert;
 mod reg_macro;
 mod traits;
-mod utils;
+pub(crate) mod utils;
 
 pub use bitstate::BitState;
 use reg_macro::*;
