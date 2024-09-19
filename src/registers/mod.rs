@@ -204,7 +204,7 @@ register! { // IOIN
     }
 }
 
-register! {
+register! { // OUTPUT
     /// Sets the IO output pin polarity in UART mode
     pub struct OUTPUT (0x04, WO) {
         /// In UART mode, SDO_CFG0 is an output. This bit
