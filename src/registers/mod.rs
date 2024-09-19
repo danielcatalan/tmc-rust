@@ -8,7 +8,7 @@ pub use bitstate::BitState;
 use reg_macro::*;
 pub use traits::*;
 
-register! {
+register! { // GCONF
     /// Global Configurations flags
     pub struct GCONF (0x00, RW) {
         /// Zero crossing recalibration during driver disable
@@ -138,7 +138,7 @@ register! {
     }
 }
 
-register! {
+register! { // GSTAT
     /// Global status flags
     pub struct GSTAT (0x01, RWC) {
         /// reset
@@ -163,7 +163,7 @@ register! {
     }
 }
 
-register! {
+register! { // IFCNT
     /// Interface transmission counter. This register becomes
     /// incremented with each successful UART interface write access.
     /// It can be read out to check the serial transmission for lost
@@ -174,7 +174,7 @@ register! {
     }
 }
 
-register! {
+register! { // SLAVECONF
     /// UART Slave Configuration
     pub struct SLAVECONF (0x03, WO) {
         ///These eight bits set the address of unit for the UART
@@ -186,7 +186,7 @@ register! {
     }
 }
 
-register! {
+register! { // IOIN
     /// Reads the state of all input pins available
     pub struct IOIN (0x04, RO) {
         refl_step:       BitState | <0>,
@@ -205,6 +205,19 @@ register! {
 }
 
 register! {
+    /// Sets the IO output pin polarity in UART mode
+    pub struct OUTPUT (0x04, WO) {
+        /// In UART mode, SDO_CFG0 is an output. This bit
+        /// programs the output polarity of this pin. Its main
+        /// purpose it to use SDO_CFG0 as NAO next address
+        /// output signal for chain addressing of multiple ICs.
+        /// Hint: Reset Value is 1 for use as NAO to next IC in
+        /// single wire chain
+        value: BitState | <0>,
+    }
+}
+
+register! { // GlobalScaler
     /// Global scaling of Motor current. This value is multiplied
     /// to the current scaling to adapt a drive to a certain
     /// motor type. This value should be chosen before tuning
@@ -219,13 +232,13 @@ register! {
     }
 }
 
-register! {
+register! { // XACTUAL
     pub struct XACTUAL (0x21, RW) {
         value: u32 | <0..31>,
     }
 }
 
-register! {
+register! { // VMAX
     pub struct VMAX (0x27, RW) {
         value: u32 | <0..22>,
     }
