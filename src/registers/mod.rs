@@ -263,6 +263,7 @@ register! { // OTPREAD
         otp_tbl:      u8 | <7>,
     }
 }
+
 register! { // GlobalScaler
     /// Global scaling of Motor current. This value is multiplied
     /// to the current scaling to adapt a drive to a certain
