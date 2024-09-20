@@ -217,6 +217,14 @@ register! { // OUTPUT
     }
 }
 
+register! { // XCOMPARE
+    /// Position comparison register for motion controller position
+    /// strobe. The Position pulse is available on output SWP_DIAG1.
+    pub struct XCOMPARE (0x05, WO) {
+       value: u32 | <0..32>,
+    }
+}
+
 register! { // GlobalScaler
     /// Global scaling of Motor current. This value is multiplied
     /// to the current scaling to adapt a drive to a certain
