@@ -1,6 +1,6 @@
 pub use crate::registers::convert::*;
 pub use crate::registers::traits::*;
-pub use crate::registers::utils::create_mask;
+pub(crate) use crate::registers::utils::create_mask;
 pub use paste::paste;
 
 macro_rules! register {
@@ -220,7 +220,7 @@ mod tests {
         assert_eq!(0, x.b());
         assert_eq!(0, x.a());
 
-        x.set_a(1);
+        let mut x = RwRegister::from_u32(0x01);
         assert_eq!(0x01, x.raw_data);
         assert_eq!(0, x.b());
         assert_eq!(1, x.a());

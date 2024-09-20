@@ -1,4 +1,4 @@
-pub const fn create_mask(lsb: u8, msb: u8) -> u32 {
+pub(crate) const fn create_mask(lsb: u8, msb: u8) -> u32 {
     let bits = ((msb as u16) + 1) - lsb as u16;
     let mask = 2u64.pow(bits as u32) - 1;
     (mask << lsb) as u32
