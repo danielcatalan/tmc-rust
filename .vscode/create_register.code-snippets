@@ -21,7 +21,7 @@
 		"body": [
 			"register! { // ${1:name}",
 			"    pub struct ${1:name} (${2:address}, ${3|RW,RWC,RO,WO|}) {",
-			"       $0",
+			"        $0",
 			"    }",
 			"}"
 		],
