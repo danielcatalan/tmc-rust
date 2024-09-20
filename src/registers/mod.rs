@@ -221,10 +221,48 @@ register! { // XCOMPARE
     /// Position comparison register for motion controller position
     /// strobe. The Position pulse is available on output SWP_DIAG1.
     pub struct XCOMPARE (0x05, WO) {
-       value: u32 | <0..32>,
+        value: u32 | <0..32>,
     }
 }
 
+register! { // OTPPROG
+    /// OTP programing \
+    /// Write access programs OTP memory (one bit at a time),
+    /// Read access refreshes read data from OTP after a write
+    pub struct OTPPROG (0x06, WO) {
+        /// Selection of OTP bit to be programmed to the selected
+        /// byte location (n=0..7: programs bit n to a logic 1)
+        otpbit: u8 | <0..2>,
+        /// Set to 00
+        otpbyte: u8 | <4..5>,
+        /// Set to 0xbd to enable programming. A programming
+        /// time of minimum 10ms per bit is recommended (check
+        /// by reading OTP_READ).
+        otpmagic: u8 | <8..15>,
+    }
+}
+
+register! { // OTPREAD
+    /// Access to OTP memory result and update
+    pub struct OTPREAD (0x07, RO) {
+        /// Reset default for FCLKTRIM \
+        /// 0: lowest frequency setting \
+        /// 31: highest frequency setting
+        otp_fclktrim: u8 | <0..4>,
+        /// Reset default for short-detection Levels: \
+        /// 0: S2G_LEVEL = S2VS_LEVEL = 6 \
+        /// 1: S2G_LEVEL = S2VS_LEVEL = 12
+        otp_s2_level: u8 | <5>,
+        /// Reset default for DRVCONF.BBMCLKS \
+        /// 0: BBMCLKS=4 \
+        /// 1: BBMCLKS=2
+        otp_bbm:      u8 | <6>,
+        /// Reset default for TBL: \
+        /// 0: TBL=%10 (~ 3µs) \
+        /// 1: TBL=%01 (~ 2µs)
+        otp_tbl:      u8 | <7>,
+    }
+}
 register! { // GlobalScaler
     /// Global scaling of Motor current. This value is multiplied
     /// to the current scaling to adapt a drive to a certain
