@@ -277,6 +277,37 @@ register! { // FACTORYCONF
     }
 }
 
+register! { // SHORTCONF
+    pub struct SHORTCONF (0x09, WO) {
+        /// Short to VS detector level for lowside FETs. Checks for
+        /// voltage drop in LS MOSFET and sense resistor.
+        /// 4 (highest sensitivity) … 15 (lowest sensitivity) \
+        /// Hint: Settings from 1 to 3 will trigger during normal
+        /// operation due to voltage drop on sense resistor. \
+        /// (Reset Default: OTP 6 or 12)
+        s2vs_level: u8 | <0..3>,
+        /// Short to GND detector level for highside FETs. Checks
+        /// for voltage drop on high side MOSFET
+        /// 2 (highest sensitivity) … 15 (lowest sensitivity) \
+        /// Attention: Settings below 6 not recommended at >52V
+        /// operation – false detection might result \
+        /// (Reset Default: OTP 6 or 12)
+        s2g_level: u8 | <8..11>,
+        /// Spike filtering bandwidth for short detection \
+        /// 0 (lowest, 100ns), 1 (1µs), 2 (2µs) 3 (3µs)
+        /// Hint: A good PCB layout will allow using setting 0.
+        /// Increase value, if erroneous short detection occurs.
+        /// (Reset Default = %01)
+        shortfilter: u8 | <16..17>, //TODO: make enum type
+        ///shortdelay: Short detection delay \
+        /// 0=750ns: normal, 1=1500ns: high
+        /// The short detection delay shall cover the bridge
+        /// switching time. 0 will work for most applications.
+        /// (Reset Default = 0)
+        shortdelay: BitState | <18>,
+    }
+}
+
 register! { // GlobalScaler
     /// Global scaling of Motor current. This value is multiplied
     /// to the current scaling to adapt a drive to a certain
