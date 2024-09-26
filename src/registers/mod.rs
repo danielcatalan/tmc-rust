@@ -8,6 +8,7 @@ pub use bitstate::BitState;
 use reg_macro::*;
 pub use traits::*;
 
+// General Configuration Registers
 register! { // GCONF
     /// Global Configurations flags
     pub struct GCONF (0x00, RW) {
@@ -264,6 +265,18 @@ register! { // OTPREAD
     }
 }
 
+register! { // FACTORYCONF
+    pub struct FACTORYCONF (0x08, RW) {
+        /// FCLKTRIM (Reset default: OTP) \
+        /// 0…31: Lowest to highest clock frequency. Check at
+        /// charge pump output. The frequency span is not
+        /// guaranteed, but it is tested, that tuning to 12MHz
+        /// internal clock is possible. The devices come preset to
+        /// 12MHz clock frequency by OTP programming
+        flck_trim: u8 | <0..4>,
+    }
+}
+
 register! { // GlobalScaler
     /// Global scaling of Motor current. This value is multiplied
     /// to the current scaling to adapt a drive to a certain
@@ -278,7 +291,9 @@ register! { // GlobalScaler
         value: u8 | <0..7>, // TODO: use concreate type instead of u8.
     }
 }
+// Velocity Dependent Driver Control Registers
 
+// Ramp Generator Motion Control Registers
 register! { // XACTUAL
     pub struct XACTUAL (0x21, RW) {
         value: u32 | <0..31>,
