@@ -2,12 +2,12 @@ mod stub;
 
 use stub::*;
 use tmc5160_driver::registers::VMAX;
-use tmc5160_driver::{Result, Tmc5160};
+use tmc5160_driver::Tmc5160;
 
 type Driver = Tmc5160<StubSpiDevice>;
 
 #[test]
-fn integration_write_test() -> Result<(), StubError> {
+fn integration_write_test() -> tmc5160_driver::error::Result<(), StubError> {
     // Setup Stub
     let mut spi_stub = StubSpiDevice::new();
     spi_stub.setup_miso([0x55, 0, 0, 0, 0]);

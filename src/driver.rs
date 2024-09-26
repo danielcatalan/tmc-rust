@@ -1,5 +1,6 @@
 use embedded_hal::spi::SpiDevice;
 
+use crate::error::*;
 use crate::registers::{ReadRegister, WriteRegister};
 use crate::SpiStatus;
 
@@ -91,13 +92,6 @@ fn create_mosi_packet(address: u8, op: Operation, tx_data: [u8; 4]) -> [u8; 5] {
 
     buf
 }
-
-#[derive(Debug)]
-pub enum Tmc5160Error<T> {
-    SpiError(T),
-}
-
-pub type Result<T, E> = core::result::Result<T, Tmc5160Error<E>>;
 
 #[cfg(test)]
 mod tests {
