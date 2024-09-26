@@ -42,7 +42,7 @@ where
         let mosi_packet = create_mosi_packet(address, op, tx_data);
         let mut miso_packet: [u8; 5] = [0x00; 5];
 
-        self.spi.transfer(&mut miso_packet, &mosi_packet)?;
+        self.transfer(&mut miso_packet, &mosi_packet)?;
 
         Ok(SpiStatus::from(miso_packet[0]))
     }
@@ -53,9 +53,19 @@ where
         let mosi_packet = create_mosi_packet(address, op, tx_data);
         let mut miso_packet: [u8; 5] = [0x00; 5];
 
-        self.spi.transfer(&mut miso_packet, &mosi_packet)?;
+        self.transfer(&mut miso_packet, &mosi_packet)?;
 
         Ok(parse_miso_packet(miso_packet))
+    }
+
+    #[inline]
+    fn transfer(
+        &mut self,
+        miso_packet: &mut [u8; 5],
+        mosi_packet: &[u8; 5],
+    ) -> Result<(), Spi::Error> {
+        self.spi.transfer(miso_packet, mosi_packet)?;
+        Ok(())
     }
 }
 
