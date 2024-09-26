@@ -1,4 +1,4 @@
-use embedded_hal::spi::{Error, ErrorKind, ErrorType, Operation, SpiDevice};
+use embedded_hal::spi::{ErrorKind, ErrorType, Operation, SpiDevice};
 
 #[derive(Debug)]
 pub struct StubSpiDevice {
@@ -23,11 +23,6 @@ impl StubSpiDevice {
     }
 }
 
-impl Error for StubSpiDevice {
-    fn kind(&self) -> ErrorKind {
-        ErrorKind::Other
-    }
-}
 impl ErrorType for StubSpiDevice {
     type Error = ErrorKind;
 }
@@ -48,12 +43,12 @@ impl SpiDevice<u8> for StubSpiDevice {
                         }
                         println!("]");
                     }
- 
+
                     // Do Assertion
                     assert_eq!(self.stub_mosi, *mosi_packet);
 
                     miso_packet.copy_from_slice(&self.stub_miso[..]);
-                    
+
                     {
                         let miso_packet: &[u8] = miso_packet;
                         print!("Rx <= [ ");
