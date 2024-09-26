@@ -64,8 +64,12 @@ where
         miso_packet: &mut [u8; 5],
         mosi_packet: &[u8; 5],
     ) -> Result<(), Spi::Error> {
-        self.spi.transfer(miso_packet, mosi_packet)?;
-        Ok(())
+        let result = self.spi.transfer(miso_packet, mosi_packet);
+
+        match result {
+            Ok(_) => Ok(()),
+            Err(e) => Err(Tmc5160Error::SpiError(e)),
+        }
     }
 }
 
@@ -87,6 +91,13 @@ fn create_mosi_packet(address: u8, op: Operation, tx_data: [u8; 4]) -> [u8; 5] {
 
     buf
 }
+
+#[derive(Debug)]
+pub enum Tmc5160Error<T> {
+    SpiError(T),
+}
+
+pub type Result<T, E> = core::result::Result<T, Tmc5160Error<E>>;
 
 #[cfg(test)]
 mod tests {

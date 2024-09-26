@@ -4,6 +4,7 @@ use embedded_hal::spi::{ErrorKind, ErrorType, Operation, SpiDevice};
 pub struct StubSpiDevice {
     stub_miso: [u8; 5],
     stub_mosi: [u8; 5],
+    stub_error: Option<StubError>,
 }
 
 impl StubSpiDevice {
@@ -11,6 +12,7 @@ impl StubSpiDevice {
         StubSpiDevice {
             stub_miso: [0; 5],
             stub_mosi: [0; 5],
+            stub_error: None,
         }
     }
 
@@ -24,11 +26,21 @@ impl StubSpiDevice {
 }
 
 impl ErrorType for StubSpiDevice {
-    type Error = ErrorKind;
+    type Error = StubError;
 }
 
 impl SpiDevice<u8> for StubSpiDevice {
     fn transaction(&mut self, operations: &mut [Operation<'_, u8>]) -> Result<(), Self::Error> {
+        // check stub error
+        match &self.stub_error {
+            None => {}
+            Some(err) => match err {
+                StubError::SomeError => {
+                    return Err(StubError::SomeError);
+                }
+            },
+        }
+        // check stub operations
         for op in operations {
             match op {
                 Operation::Read(_) => todo!(),
@@ -64,5 +76,16 @@ impl SpiDevice<u8> for StubSpiDevice {
         }
 
         Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub enum StubError {
+    SomeError,
+}
+
+impl embedded_hal::spi::Error for StubError {
+    fn kind(&self) -> ErrorKind {
+        ErrorKind::Other
     }
 }
