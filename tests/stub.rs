@@ -34,11 +34,9 @@ impl SpiDevice<u8> for StubSpiDevice {
         // check stub error
         match &self.stub_error {
             None => {}
-            Some(err) => match err {
-                StubError::SomeError => {
-                    return Err(StubError::SomeError);
-                }
-            },
+            Some(err) => {
+                return Err(err.clone());
+            }
         }
         // check stub operations
         for op in operations {
@@ -79,10 +77,8 @@ impl SpiDevice<u8> for StubSpiDevice {
     }
 }
 
-#[derive(Debug)]
-pub enum StubError {
-    SomeError,
-}
+#[derive(Debug, Clone)]
+pub struct StubError {}
 
 impl embedded_hal::spi::Error for StubError {
     fn kind(&self) -> ErrorKind {
