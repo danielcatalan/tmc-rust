@@ -1,0 +1,12 @@
+[package]
+name = "ftdi-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tmc5160-driver = { path = "../../" }
+embedded-hal = "1.0.0"
+
+[dependencies.ftdi-embedded-hal]
+version = "0.22.0"
+features = ["libftd2xx", "libftd2xx-static"]
